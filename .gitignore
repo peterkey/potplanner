@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MCP configuration (may expand env vars; template committed as .mcp.json.example)
+.mcp.json
