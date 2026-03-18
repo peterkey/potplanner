@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-03-PLAN.md
-last_updated: "2026-03-18T17:35:26.934Z"
-last_activity: 2026-03-18 — Roadmap created; ready to plan Phase 1
+stopped_at: Completed 01-foundation-04-PLAN.md
+last_updated: "2026-03-18T17:39:03Z"
+last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 44
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-18)
 ## Current Position
 
 Phase: 1 of 9 (Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-18 — Roadmap created; ready to plan Phase 1
+Plan: 4 of 4 in current phase (all Phase 1 plans complete)
+Status: Phase 1 complete — ready for Phase 2 (CI/CD)
+Last activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [████░░░░░░] 44%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P01 | 11 | 2 tasks | 18 files |
 | Phase 01-foundation P02 | 2 | 2 tasks | 6 files |
 | Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
+| Phase 01-foundation P04 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: .gitignore fixed: .env* wildcard replaced with explicit patterns so .env.example can be committed while .env remains gitignored
 - [Phase 01-foundation]: Dockerfile uses ARG NODE_VERSION=24-slim so all three stages share the same base image version via single point of control
 - [Phase 01-foundation]: Dev compose targets dependencies stage only — no production build overhead; source mounted via volume for hot-reload
+- [Phase 01-foundation]: CLAUDE.md enshrines integer pence, append-only ledger, verifySession() in DAL, server-only boundaries, proxy.ts redirect-only rule
+- [Phase 01-foundation]: GitHub MCP requires classic PAT (ghp_) not fine-grained token; .mcp.json gitignored; .mcp.json.example committed as template
 
 ### Pending Todos
 
@@ -87,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:35:26.931Z
-Stopped at: Completed 01-foundation-03-PLAN.md
+Last session: 2026-03-18T17:39:03Z
+Stopped at: Completed 01-foundation-04-PLAN.md
 Resume file: None

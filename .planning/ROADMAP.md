@@ -12,7 +12,7 @@ PotPlanner v2 rebuilds the household budgeting app from scratch in TypeScript. T
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Project scaffold, Docker Compose stack, Drizzle schema with integer pence and append-only ledger, CLAUDE.md, MCP configuration
+- [x] **Phase 1: Foundation** - Project scaffold, Docker Compose stack, Drizzle schema with integer pence and append-only ledger, CLAUDE.md, MCP configuration (completed 2026-03-18)
 - [ ] **Phase 2: CI/CD and Test Infrastructure** - GitHub Actions pipeline (lint, type-check, test, build) and Playwright E2E infrastructure wired to CI
 - [ ] **Phase 3: Authentication** - Shared household login, JWT with httpOnly cookie, Redis blacklist logout, rate limiting, DAL session guard
 - [ ] **Phase 4: Financial Engine** - Pure TypeScript engine (lib/engine/) — income, disposable income, pot allocation, bill forecasting, full Vitest suite
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. CLAUDE.md exists at repo root and contains architecture decisions, integer pence rule, append-only ledger rule, and `verifySession()` convention
   4. Context7 MCP is configured and GitHub MCP auth error is resolved and documented
   5. The codebase compiles with `tsc --noEmit` and the `server-only` boundary is enforced on DAL/DB/session files
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 - [ ] 01-01-PLAN.md — Scaffold Next.js 16 with dependencies, directory structure, shadcn/ui violet theme, Vitest config
 - [ ] 01-02-PLAN.md — Drizzle schema (8 tables, integer pence), DB client, migration tooling, .env setup
@@ -141,7 +141,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 3/4 | In Progress|  |
+| 1. Foundation | 4/4 | Complete   | 2026-03-18 |
 | 2. CI/CD and Test Infrastructure | 0/TBD | Not started | - |
 | 3. Authentication | 0/TBD | Not started | - |
 | 4. Financial Engine | 0/TBD | Not started | - |
