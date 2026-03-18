@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+.planning
+.claude
+.env
+.env.local
+*.md
+docker-compose*.yml
+nginx.conf
+drizzle/
