@@ -112,26 +112,60 @@
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01–07 | Phase 1 | Pending |
-| AUTH-01–06 | Phase 2 | Pending |
-| ENG-01–06 | Phase 3 | Pending |
-| ACCT-01–03 | Phase 4 | Pending |
-| POT-01–05 | Phase 4 | Pending |
-| BILL-01–07 | Phase 4 | Pending |
-| DEBT-01–04 | Phase 5 | Pending |
-| SAV-01–03 | Phase 5 | Pending |
-| RPT-01–03 | Phase 6 | Pending |
-| UX-01–02 | Phase 6 | Pending |
+| SCAF-01 | Phase 1 — Foundation | Pending |
+| SCAF-02 | Phase 1 — Foundation | Pending |
+| SCAF-03 | Phase 1 — Foundation | Pending |
+| SCAF-05 | Phase 1 — Foundation | Pending |
+| SCAF-06 | Phase 1 — Foundation | Pending |
+| SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Pending |
+| SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Pending |
+| AUTH-01 | Phase 3 — Authentication | Pending |
+| AUTH-02 | Phase 3 — Authentication | Pending |
+| AUTH-03 | Phase 3 — Authentication | Pending |
+| AUTH-04 | Phase 3 — Authentication | Pending |
+| AUTH-05 | Phase 3 — Authentication | Pending |
+| AUTH-06 | Phase 3 — Authentication | Pending |
+| ENG-01 | Phase 4 — Financial Engine | Pending |
+| ENG-02 | Phase 4 — Financial Engine | Pending |
+| ENG-03 | Phase 4 — Financial Engine | Pending |
+| ENG-05 | Phase 4 — Financial Engine | Pending |
+| ENG-06 | Phase 4 — Financial Engine | Pending |
+| ACCT-01 | Phase 5 — Accounts and Pots | Pending |
+| ACCT-02 | Phase 5 — Accounts and Pots | Pending |
+| ACCT-03 | Phase 5 — Accounts and Pots | Pending |
+| POT-01 | Phase 5 — Accounts and Pots | Pending |
+| POT-02 | Phase 5 — Accounts and Pots | Pending |
+| POT-03 | Phase 5 — Accounts and Pots | Pending |
+| POT-04 | Phase 5 — Accounts and Pots | Pending |
+| POT-05 | Phase 5 — Accounts and Pots | Pending |
+| BILL-01 | Phase 6 — Bills | Pending |
+| BILL-02 | Phase 6 — Bills | Pending |
+| BILL-03 | Phase 6 — Bills | Pending |
+| BILL-04 | Phase 6 — Bills | Pending |
+| BILL-05 | Phase 6 — Bills | Pending |
+| BILL-06 | Phase 6 — Bills | Pending |
+| BILL-07 | Phase 6 — Bills | Pending |
+| ENG-04 | Phase 7 — Transfer History and Reporting | Pending |
+| RPT-01 | Phase 7 — Transfer History and Reporting | Pending |
+| RPT-02 | Phase 7 — Transfer History and Reporting | Pending |
+| RPT-03 | Phase 7 — Transfer History and Reporting | Pending |
+| DEBT-01 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| DEBT-02 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| DEBT-03 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| DEBT-04 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| SAV-01 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| SAV-02 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| SAV-03 | Phase 8 — Debt Tracking and Savings Goals | Pending |
+| UX-01 | Phase 9 — Dashboard and UX Polish | Pending |
+| UX-02 | Phase 9 — Dashboard and UX Polish | Pending |
 
 **Coverage:**
-- v1 requirements: 40 total
-- Mapped to phases: 40
-- Unmapped: 0 ✓
+- v1 requirements: 46 total
+- Mapped to phases: 46
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 — traceability updated after roadmap creation*
