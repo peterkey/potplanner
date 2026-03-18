@@ -12,7 +12,7 @@
 - [ ] **SCAF-03**: Docker Compose runs app + PostgreSQL + Redis + Nginx with health checks and correct startup order
 - [ ] **SCAF-04**: GitHub Actions CI/CD runs lint, type-check, Vitest unit tests, and build on every push/PR
 - [ ] **SCAF-05**: Context7 MCP configured; GitHub MCP auth error resolved and documented
-- [ ] **SCAF-06**: Drizzle schema and migration tooling configured with integer pence columns and append-only ledger pattern
+- [x] **SCAF-06**: Drizzle schema and migration tooling configured with integer pence columns and append-only ledger pattern
 - [ ] **SCAF-07**: Playwright E2E test infrastructure configured and connected to CI/CD
 
 ### Authentication
@@ -118,7 +118,7 @@
 | SCAF-02 | Phase 1 — Foundation | Pending |
 | SCAF-03 | Phase 1 — Foundation | Pending |
 | SCAF-05 | Phase 1 — Foundation | Pending |
-| SCAF-06 | Phase 1 — Foundation | Pending |
+| SCAF-06 | Phase 1 — Foundation | Complete |
 | SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Pending |
 | SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Pending |
 | AUTH-01 | Phase 3 — Authentication | Pending |
