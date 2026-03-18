@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-18T13:31:49.395Z"
+stopped_at: Completed 01-foundation-01-PLAN.md
+last_updated: "2026-03-18T17:27:06.980Z"
 last_activity: 2026-03-18 — Roadmap created; ready to plan Phase 1
 progress:
   total_phases: 9
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-foundation P01 | 11 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,9 @@ Recent decisions affecting current work:
 - [Phase 1]: Append-only ledger pattern for balances — never maintain a mutable `current_balance` column
 - [Phase 3]: proxy.ts is a redirect-only layer; `verifySession()` in the DAL is the real security gate
 - [Phase 3]: Redis blacklist for JWT invalidation — must be designed alongside JWT issuance, not added later
+- [Phase 01-foundation]: shadcn init chose Nova preset (Radix/Lucide/Geist); violet theme applied via CSS variable override independent of baseColor
+- [Phase 01-foundation]: create-next-app scaffolded in temp dir (PotPlanner/ directory name violates npm naming rules)
+- [Phase 01-foundation]: output: standalone in next.config.ts set as first configuration change — non-negotiable for Docker image optimisation
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T13:31:49.367Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation/01-CONTEXT.md
+Last session: 2026-03-18T17:27:06.964Z
+Stopped at: Completed 01-foundation-01-PLAN.md
+Resume file: None
