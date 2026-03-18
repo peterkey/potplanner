@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-02-PLAN.md
-last_updated: "2026-03-18T17:31:32.479Z"
+stopped_at: Completed 01-foundation-03-PLAN.md
+last_updated: "2026-03-18T17:35:26.934Z"
 last_activity: 2026-03-18 — Roadmap created; ready to plan Phase 1
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 11 | 2 tasks | 18 files |
 | Phase 01-foundation P02 | 2 | 2 tasks | 6 files |
+| Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: integer pence for all monetary columns (integer type maps to PostgreSQL INTEGER 32-bit, max ~21M pence); interest_rate stored in basis points (2500 = 25.00%)
 - [Phase 01-foundation]: transfer_history is append-only by design — rows NEVER updated or deleted; balances always derived from ledger entries, never maintained as mutable column
 - [Phase 01-foundation]: .gitignore fixed: .env* wildcard replaced with explicit patterns so .env.example can be committed while .env remains gitignored
+- [Phase 01-foundation]: Dockerfile uses ARG NODE_VERSION=24-slim so all three stages share the same base image version via single point of control
+- [Phase 01-foundation]: Dev compose targets dependencies stage only — no production build overhead; source mounted via volume for hot-reload
 
 ### Pending Todos
 
@@ -84,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:31:32.476Z
-Stopped at: Completed 01-foundation-02-PLAN.md
+Last session: 2026-03-18T17:35:26.931Z
+Stopped at: Completed 01-foundation-03-PLAN.md
 Resume file: None
