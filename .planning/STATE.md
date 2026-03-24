@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 02-ci-cd-and-test-infrastructure-02-01-PLAN.md
-last_updated: "2026-03-24T10:20:33.094Z"
+stopped_at: Completed 02-ci-cd-and-test-infrastructure-02-02-PLAN.md
+last_updated: "2026-03-24T10:29:53.434Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 44
 ---
 
@@ -55,6 +55,7 @@ Progress: [████░░░░░░] 44%
 | Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
 | Phase 01-foundation P04 | 3 | 2 tasks | 4 files |
 | Phase 02-ci-cd-and-test-infrastructure P01 | 4 | 1 tasks | 4 files |
+| Phase 02-ci-cd-and-test-infrastructure P02 | 7 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase 02-ci-cd-and-test-infrastructure]: Use eslint@9 not eslint@10: eslint-plugin-react@7.37.x (bundled in eslint-config-next) calls context.getFilename() removed in ESLint 10; ESLint 9 is the compatible version
 - [Phase 02-ci-cd-and-test-infrastructure]: Set settings.react.version to fixed string in eslint.config.mjs to prevent eslint-plugin-react from calling detectReactVersion which uses the removed getFilename API
 - [Phase 02-ci-cd-and-test-infrastructure]: Add passWithNoTests: true to vitest.config.mts so vitest run exits 0 when no test files exist (CI must pass before tests are written)
+- [Phase 02-ci-cd-and-test-infrastructure]: Playwright webServer uses node .next/standalone/server.js with PORT/HOSTNAME — output:standalone incompatible with npm run start
+- [Phase 02-ci-cd-and-test-infrastructure]: E2E smoke test navigates directly to /login since proxy.ts not yet present; redirect assertion deferred to Phase 3
+- [Phase 02-ci-cd-and-test-infrastructure]: Chromium + Firefox only in Playwright projects; no WebKit — too flaky on Linux CI runners
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T10:20:33.088Z
-Stopped at: Completed 02-ci-cd-and-test-infrastructure-02-01-PLAN.md
+Last session: 2026-03-24T10:29:53.432Z
+Stopped at: Completed 02-ci-cd-and-test-infrastructure-02-02-PLAN.md
 Resume file: None

@@ -13,7 +13,7 @@
 - [x] **SCAF-04**: GitHub Actions CI/CD runs lint, type-check, Vitest unit tests, and build on every push/PR
 - [x] **SCAF-05**: Context7 MCP configured; GitHub MCP auth error resolved and documented
 - [x] **SCAF-06**: Drizzle schema and migration tooling configured with integer pence columns and append-only ledger pattern
-- [ ] **SCAF-07**: Playwright E2E test infrastructure configured and connected to CI/CD
+- [x] **SCAF-07**: Playwright E2E test infrastructure configured and connected to CI/CD
 
 ### Authentication
 
@@ -120,7 +120,7 @@
 | SCAF-05 | Phase 1 — Foundation | Complete |
 | SCAF-06 | Phase 1 — Foundation | Complete |
 | SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Complete |
-| SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Pending |
+| SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Complete |
 | AUTH-01 | Phase 3 — Authentication | Pending |
 | AUTH-02 | Phase 3 — Authentication | Pending |
 | AUTH-03 | Phase 3 — Authentication | Pending |

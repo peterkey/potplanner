@@ -13,7 +13,7 @@ PotPlanner v2 rebuilds the household budgeting app from scratch in TypeScript. T
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project scaffold, Docker Compose stack, Drizzle schema with integer pence and append-only ledger, CLAUDE.md, MCP configuration (completed 2026-03-18)
-- [ ] **Phase 2: CI/CD and Test Infrastructure** - GitHub Actions pipeline (lint, type-check, test, build) and Playwright E2E infrastructure wired to CI
+- [x] **Phase 2: CI/CD and Test Infrastructure** - GitHub Actions pipeline (lint, type-check, test, build) and Playwright E2E infrastructure wired to CI (completed 2026-03-24)
 - [ ] **Phase 3: Authentication** - Shared household login, JWT with httpOnly cookie, Redis blacklist logout, rate limiting, DAL session guard
 - [ ] **Phase 4: Financial Engine** - Pure TypeScript engine (lib/engine/) — income, disposable income, pot allocation, bill forecasting, full Vitest suite
 - [ ] **Phase 5: Accounts and Pots** - DAL + API + UI for bank accounts and budget pots with income allocation
@@ -49,7 +49,7 @@ Plans:
   1. A pull request triggers GitHub Actions: lint, type-check, Vitest unit tests, and Next.js build all run and must pass before merge
   2. Playwright is installed and configured; a smoke test navigates to the app and asserts the page loads
   3. CI uses `hashFiles()` cache keys so dependency installs are cached correctly across runs
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 02-01-PLAN.md — ESLint flat config, lint and test npm scripts
 - [ ] 02-02-PLAN.md — Playwright config, smoke test, GitHub Actions CI workflow
@@ -145,7 +145,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete   | 2026-03-18 |
-| 2. CI/CD and Test Infrastructure | 1/2 | In Progress|  |
+| 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 0/TBD | Not started | - |
 | 4. Financial Engine | 0/TBD | Not started | - |
 | 5. Accounts and Pots | 0/TBD | Not started | - |
