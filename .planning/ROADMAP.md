@@ -65,7 +65,11 @@ Plans:
   4. Navigating to any app route while unauthenticated redirects to the login page
   5. More than 5 failed login attempts in a short window returns a 429 rate-limit response
   6. Every DAL function calls `verifySession()` before touching the database (proxy.ts is redirect-only, not a security gate)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — Redis singleton, JWT session helpers (sign/verify/destroy), rate limiter, unit tests
+- [ ] 03-02-PLAN.md — Login/logout API routes, DAL auth function, seed script, route tests
+- [ ] 03-03-PLAN.md — proxy.ts route protection, login form UI, (app) layout guard, e2e tests
 
 ### Phase 4: Financial Engine
 **Goal**: The core financial calculations are proven correct in isolation, ready to be wired to real data
@@ -146,7 +150,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete   | 2026-03-18 |
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
-| 3. Authentication | 0/TBD | Not started | - |
+| 3. Authentication | 0/3 | Not started | - |
 | 4. Financial Engine | 0/TBD | Not started | - |
 | 5. Accounts and Pots | 0/TBD | Not started | - |
 | 6. Bills | 0/TBD | Not started | - |
