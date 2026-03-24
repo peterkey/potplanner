@@ -10,7 +10,7 @@
 - [x] **SCAF-01**: Project is scaffolded with Next.js App Router + TypeScript, Drizzle ORM, shadcn/ui, and correct Docker Compose setup (`output: 'standalone'`)
 - [x] **SCAF-02**: CLAUDE.md exists with project conventions, architecture decisions, security rules, and Claude Code workflow guidance
 - [x] **SCAF-03**: Docker Compose runs app + PostgreSQL + Redis + Nginx with health checks and correct startup order
-- [ ] **SCAF-04**: GitHub Actions CI/CD runs lint, type-check, Vitest unit tests, and build on every push/PR
+- [x] **SCAF-04**: GitHub Actions CI/CD runs lint, type-check, Vitest unit tests, and build on every push/PR
 - [x] **SCAF-05**: Context7 MCP configured; GitHub MCP auth error resolved and documented
 - [x] **SCAF-06**: Drizzle schema and migration tooling configured with integer pence columns and append-only ledger pattern
 - [ ] **SCAF-07**: Playwright E2E test infrastructure configured and connected to CI/CD
@@ -119,7 +119,7 @@
 | SCAF-03 | Phase 1 — Foundation | Complete |
 | SCAF-05 | Phase 1 — Foundation | Complete |
 | SCAF-06 | Phase 1 — Foundation | Complete |
-| SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Pending |
+| SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Complete |
 | SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Pending |
 | AUTH-01 | Phase 3 — Authentication | Pending |
 | AUTH-02 | Phase 3 — Authentication | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-24T09:55:01.955Z"
+stopped_at: Completed 02-ci-cd-and-test-infrastructure-02-01-PLAN.md
+last_updated: "2026-03-24T10:20:33.094Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 44
 ---
 
@@ -54,6 +54,7 @@ Progress: [████░░░░░░] 44%
 | Phase 01-foundation P02 | 2 | 2 tasks | 6 files |
 | Phase 01-foundation P03 | 2 | 2 tasks | 5 files |
 | Phase 01-foundation P04 | 3 | 2 tasks | 4 files |
+| Phase 02-ci-cd-and-test-infrastructure P01 | 4 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Dev compose targets dependencies stage only — no production build overhead; source mounted via volume for hot-reload
 - [Phase 01-foundation]: CLAUDE.md enshrines integer pence, append-only ledger, verifySession() in DAL, server-only boundaries, proxy.ts redirect-only rule
 - [Phase 01-foundation]: GitHub MCP requires classic PAT (ghp_) not fine-grained token; .mcp.json gitignored; .mcp.json.example committed as template
+- [Phase 02-ci-cd-and-test-infrastructure]: Use eslint@9 not eslint@10: eslint-plugin-react@7.37.x (bundled in eslint-config-next) calls context.getFilename() removed in ESLint 10; ESLint 9 is the compatible version
+- [Phase 02-ci-cd-and-test-infrastructure]: Set settings.react.version to fixed string in eslint.config.mjs to prevent eslint-plugin-react from calling detectReactVersion which uses the removed getFilename API
+- [Phase 02-ci-cd-and-test-infrastructure]: Add passWithNoTests: true to vitest.config.mts so vitest run exits 0 when no test files exist (CI must pass before tests are written)
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T09:55:01.952Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-ci-cd-and-test-infrastructure/02-CONTEXT.md
+Last session: 2026-03-24T10:20:33.088Z
+Stopped at: Completed 02-ci-cd-and-test-infrastructure-02-01-PLAN.md
+Resume file: None

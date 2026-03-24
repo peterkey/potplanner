@@ -49,7 +49,7 @@ Plans:
   1. A pull request triggers GitHub Actions: lint, type-check, Vitest unit tests, and Next.js build all run and must pass before merge
   2. Playwright is installed and configured; a smoke test navigates to the app and asserts the page loads
   3. CI uses `hashFiles()` cache keys so dependency installs are cached correctly across runs
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 02-01-PLAN.md — ESLint flat config, lint and test npm scripts
 - [ ] 02-02-PLAN.md — Playwright config, smoke test, GitHub Actions CI workflow
@@ -145,7 +145,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete   | 2026-03-18 |
-| 2. CI/CD and Test Infrastructure | 0/2 | Planned | - |
+| 2. CI/CD and Test Infrastructure | 1/2 | In Progress|  |
 | 3. Authentication | 0/TBD | Not started | - |
 | 4. Financial Engine | 0/TBD | Not started | - |
 | 5. Accounts and Pots | 0/TBD | Not started | - |
