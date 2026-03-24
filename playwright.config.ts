@@ -23,9 +23,11 @@ export default defineConfig({
     // WebKit intentionally excluded — too flaky on Linux CI
   ],
   webServer: {
-    // output: standalone requires node .next/standalone/server.js (npm run start does not work)
-    // PORT and HOSTNAME must be set explicitly for standalone server
-    command: 'PORT=3000 HOSTNAME=0.0.0.0 node .next/standalone/server.js',
+    // CI: standalone server (build artifact already downloaded by CI workflow)
+    // Local: next dev (no pre-build required)
+    command: process.env.CI
+      ? 'PORT=3000 HOSTNAME=0.0.0.0 node .next/standalone/server.js'
+      : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
