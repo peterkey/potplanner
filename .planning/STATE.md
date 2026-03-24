@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 03-authentication-03-01-PLAN.md
-last_updated: "2026-03-24T14:11:38.722Z"
+stopped_at: Completed 03-authentication-03-02-PLAN.md
+last_updated: "2026-03-24T14:16:37.123Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 44
 ---
 
@@ -57,6 +57,7 @@ Progress: [████░░░░░░] 44%
 | Phase 02-ci-cd-and-test-infrastructure P01 | 4 | 1 tasks | 4 files |
 | Phase 02-ci-cd-and-test-infrastructure P02 | 7 | 2 tasks | 5 files |
 | Phase 03-authentication P01 | 208 | 2 tasks | 7 files |
+| Phase 03-authentication P02 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 02-ci-cd-and-test-infrastructure]: E2E smoke test navigates directly to /login since proxy.ts not yet present; redirect assertion deferred to Phase 3
 - [Phase 02-ci-cd-and-test-infrastructure]: Chromium + Firefox only in Playwright projects; no WebKit — too flaky on Linux CI runners
 - [Phase 03-authentication]: Use @vitest-environment node in session.test.ts for Web Crypto API compatibility with jose's TextEncoder/Uint8Array key signing
+- [Phase 03-authentication]: getUserByEmail does not call verifySession() — login DAL is a documented exception since auth is not yet established at login time
+- [Phase 03-authentication]: Rate limit check placed before DB lookup to avoid timing side-channels
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T14:11:38.715Z
-Stopped at: Completed 03-authentication-03-01-PLAN.md
+Last session: 2026-03-24T14:16:37.116Z
+Stopped at: Completed 03-authentication-03-02-PLAN.md
 Resume file: None

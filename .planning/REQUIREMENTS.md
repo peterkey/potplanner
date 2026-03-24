@@ -17,9 +17,9 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can log in with email and password via shared household login
+- [x] **AUTH-01**: User can log in with email and password via shared household login
 - [x] **AUTH-02**: User session persists across browser refresh (JWT stored in httpOnly cookie)
-- [ ] **AUTH-03**: User can log out; token is invalidated via Redis blacklist
+- [x] **AUTH-03**: User can log out; token is invalidated via Redis blacklist
 - [ ] **AUTH-04**: All app routes are protected — unauthenticated requests redirect to login
 - [x] **AUTH-05**: Login is rate-limited to prevent brute force
 - [x] **AUTH-06**: `verifySession()` is called in the DAL on every data access (proxy layer is redirect only, not a security gate)
@@ -121,9 +121,9 @@
 | SCAF-06 | Phase 1 — Foundation | Complete |
 | SCAF-04 | Phase 2 — CI/CD and Test Infrastructure | Complete |
 | SCAF-07 | Phase 2 — CI/CD and Test Infrastructure | Complete |
-| AUTH-01 | Phase 3 — Authentication | Pending |
+| AUTH-01 | Phase 3 — Authentication | Complete |
 | AUTH-02 | Phase 3 — Authentication | Complete |
-| AUTH-03 | Phase 3 — Authentication | Pending |
+| AUTH-03 | Phase 3 — Authentication | Complete |
 | AUTH-04 | Phase 3 — Authentication | Pending |
 | AUTH-05 | Phase 3 — Authentication | Complete |
 | AUTH-06 | Phase 3 — Authentication | Complete |
