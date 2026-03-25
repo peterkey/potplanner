@@ -96,7 +96,11 @@ Plans:
   3. Pot balance (allocated minus spent) is displayed per pot and updates when bills are marked paid
   4. Pots reset to zero at the start of each month (zero-based budgeting); rollover field exists in the schema for v2
   5. All DAL functions for accounts and pots call `verifySession()` before executing any query
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
+- [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
+- [ ] 05-03-PLAN.md — Pots page UI (table, income input, allocation summary, rollover toggle, reset month)
 
 ### Phase 6: Bills
 **Goal**: Users can track all bills, see what is upcoming, and the engine knows which bills belong to which pot
@@ -108,7 +112,11 @@ Plans:
   3. User can mark a bill as paid or unpaid within the current cycle
   4. User can set a joint split percentage (e.g. 60% / 40%) on any bill
   5. An upcoming bills panel shows all bills due in the next 30 days, projected from each bill's frequency
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
+- [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
+- [ ] 05-03-PLAN.md — Pots page UI (table, income input, allocation summary, rollover toggle, reset month)
 
 ### Phase 7: Transfer History and Reporting
 **Goal**: Users can see a full audit trail of movements and understand their spending by category
@@ -119,7 +127,11 @@ Plans:
   2. Transfer history is viewable in the UI and can be filtered by date range
   3. A spending donut chart displays the current month's breakdown by pot/category
   4. Bill payee logos are fetched via Clearbit and displayed next to each bill; a favicon or initial-based placeholder is shown when Clearbit returns no result
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
+- [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
+- [ ] 05-03-PLAN.md — Pots page UI (table, income input, allocation summary, rollover toggle, reset month)
 
 ### Phase 8: Debt Tracking and Savings Goals
 **Goal**: Users can track debts with payoff strategies and savings goals linked to pots
@@ -131,7 +143,11 @@ Plans:
   3. A month-by-month payoff timeline is projected for each strategy
   4. User can create savings goals with a name, target amount, and optional link to a pot
   5. Progress toward each savings goal is visible (amount saved vs target)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
+- [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
+- [ ] 05-03-PLAN.md — Pots page UI (table, income input, allocation summary, rollover toggle, reset month)
 
 ### Phase 9: Dashboard and UX Polish
 **Goal**: Every page is usable on a phone and the dashboard gives an at-a-glance picture of household finances
@@ -141,7 +157,11 @@ Plans:
   1. All pages render without horizontal scroll on a 375px-wide viewport (iPhone SE equivalent)
   2. The UI uses primary colour `#7c3aed` (violet) with the triadic colour system applied via shadcn/ui theming throughout
   3. A dashboard page surfaces: disposable income, pot health summary, upcoming bills, spending donut, and debt overview in a single view
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
+- [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
+- [ ] 05-03-PLAN.md — Pots page UI (table, income input, allocation summary, rollover toggle, reset month)
 
 ## Progress
 
@@ -156,7 +176,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 3/3 | Complete   | 2026-03-24 |
 | 4. Financial Engine | 3/3 | Complete   | 2026-03-25 |
-| 5. Accounts and Pots | 0/TBD | Not started | - |
+| 5. Accounts and Pots | 0/3 | In progress | - |
 | 6. Bills | 0/TBD | Not started | - |
 | 7. Transfer History and Reporting | 0/TBD | Not started | - |
 | 8. Debt Tracking and Savings Goals | 0/TBD | Not started | - |
