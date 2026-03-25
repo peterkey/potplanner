@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Project scaffold, Docker Compose stack, Drizzle schema with integer pence and append-only ledger, CLAUDE.md, MCP configuration (completed 2026-03-18)
 - [x] **Phase 2: CI/CD and Test Infrastructure** - GitHub Actions pipeline (lint, type-check, test, build) and Playwright E2E infrastructure wired to CI (completed 2026-03-24)
 - [x] **Phase 3: Authentication** - Shared household login, JWT with httpOnly cookie, Redis blacklist logout, rate limiting, DAL session guard (completed 2026-03-24)
-- [ ] **Phase 4: Financial Engine** - Pure TypeScript engine (lib/engine/) — income, disposable income, pot allocation, bill forecasting, full Vitest suite
+- [x] **Phase 4: Financial Engine** - Pure TypeScript engine (lib/engine/) — income, disposable income, pot allocation, bill forecasting, full Vitest suite (completed 2026-03-25)
 - [ ] **Phase 5: Accounts and Pots** - DAL + API + UI for bank accounts and budget pots with income allocation
 - [ ] **Phase 6: Bills** - DAL + API + UI for bills CRUD, recurring cadence, potless bills, joint splits, upcoming bills panel
 - [ ] **Phase 7: Transfer History and Reporting** - Transfer history log with filtering, spending donut chart, Clearbit payee logos
@@ -80,7 +80,7 @@ Plans:
   2. All monetary arithmetic uses integer pence and decimal.js — no native JS float arithmetic on monetary values anywhere in the engine
   3. Vitest unit test suite exceeds 48 tests and covers edge cases including weekly/annual bill cadences and minimum-payment debt scenarios
   4. Running `vitest run` in CI passes with zero failures
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 04-01-PLAN.md — Install deps, types.ts, TDD income + pots modules
 - [ ] 04-02-PLAN.md — TDD bill scheduling module (all 5 frequencies, date drift prevention)
@@ -155,7 +155,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | 1. Foundation | 4/4 | Complete   | 2026-03-18 |
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 3/3 | Complete   | 2026-03-24 |
-| 4. Financial Engine | 2/3 | In Progress|  |
+| 4. Financial Engine | 3/3 | Complete   | 2026-03-25 |
 | 5. Accounts and Pots | 0/TBD | Not started | - |
 | 6. Bills | 0/TBD | Not started | - |
 | 7. Transfer History and Reporting | 0/TBD | Not started | - |

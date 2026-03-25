@@ -52,7 +52,7 @@
 
 - [x] **ENG-01**: User can set total monthly income
 - [x] **ENG-02**: Disposable income is calculated (income − pot allocations − bills)
-- [ ] **ENG-03**: Financial forecast projects income, bills, and pot balances forward N months
+- [x] **ENG-03**: Financial forecast projects income, bills, and pot balances forward N months
 - [ ] **ENG-04**: Transfer history logs all pot/account movements with timestamps
 - [x] **ENG-05**: Financial engine is implemented as pure TypeScript functions in `lib/engine/` with integer pence arithmetic
 - [x] **ENG-06**: Engine has full unit test coverage via Vitest (target: rebuild and exceed original 48 tests)
@@ -129,7 +129,7 @@
 | AUTH-06 | Phase 3 — Authentication | Complete |
 | ENG-01 | Phase 4 — Financial Engine | Complete |
 | ENG-02 | Phase 4 — Financial Engine | Complete |
-| ENG-03 | Phase 4 — Financial Engine | Pending |
+| ENG-03 | Phase 4 — Financial Engine | Complete |
 | ENG-05 | Phase 4 — Financial Engine | Complete |
 | ENG-06 | Phase 4 — Financial Engine | Complete |
 | ACCT-01 | Phase 5 — Accounts and Pots | Pending |
