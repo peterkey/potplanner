@@ -80,7 +80,11 @@ Plans:
   2. All monetary arithmetic uses integer pence and decimal.js — no native JS float arithmetic on monetary values anywhere in the engine
   3. Vitest unit test suite exceeds 48 tests and covers edge cases including weekly/annual bill cadences and minimum-payment debt scenarios
   4. Running `vitest run` in CI passes with zero failures
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Install deps, types.ts, TDD income + pots modules
+- [ ] 04-02-PLAN.md — TDD bill scheduling module (all 5 frequencies, date drift prevention)
+- [ ] 04-03-PLAN.md — TDD forecast module, barrel export, 60+ test suite verification
 
 ### Phase 5: Accounts and Pots
 **Goal**: Users can manage their bank accounts and budget pots, allocate income, and see pot balances
@@ -151,7 +155,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | 1. Foundation | 4/4 | Complete   | 2026-03-18 |
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 3/3 | Complete   | 2026-03-24 |
-| 4. Financial Engine | 0/TBD | Not started | - |
+| 4. Financial Engine | 0/3 | Not started | - |
 | 5. Accounts and Pots | 0/TBD | Not started | - |
 | 6. Bills | 0/TBD | Not started | - |
 | 7. Transfer History and Reporting | 0/TBD | Not started | - |
