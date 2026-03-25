@@ -50,12 +50,12 @@
 
 ### Financial Engine
 
-- [ ] **ENG-01**: User can set total monthly income
-- [ ] **ENG-02**: Disposable income is calculated (income − pot allocations − bills)
+- [x] **ENG-01**: User can set total monthly income
+- [x] **ENG-02**: Disposable income is calculated (income − pot allocations − bills)
 - [ ] **ENG-03**: Financial forecast projects income, bills, and pot balances forward N months
 - [ ] **ENG-04**: Transfer history logs all pot/account movements with timestamps
-- [ ] **ENG-05**: Financial engine is implemented as pure TypeScript functions in `lib/engine/` with integer pence arithmetic
-- [ ] **ENG-06**: Engine has full unit test coverage via Vitest (target: rebuild and exceed original 48 tests)
+- [x] **ENG-05**: Financial engine is implemented as pure TypeScript functions in `lib/engine/` with integer pence arithmetic
+- [x] **ENG-06**: Engine has full unit test coverage via Vitest (target: rebuild and exceed original 48 tests)
 
 ### Debt Tracking
 
@@ -127,11 +127,11 @@
 | AUTH-04 | Phase 3 — Authentication | Complete |
 | AUTH-05 | Phase 3 — Authentication | Complete |
 | AUTH-06 | Phase 3 — Authentication | Complete |
-| ENG-01 | Phase 4 — Financial Engine | Pending |
-| ENG-02 | Phase 4 — Financial Engine | Pending |
+| ENG-01 | Phase 4 — Financial Engine | Complete |
+| ENG-02 | Phase 4 — Financial Engine | Complete |
 | ENG-03 | Phase 4 — Financial Engine | Pending |
-| ENG-05 | Phase 4 — Financial Engine | Pending |
-| ENG-06 | Phase 4 — Financial Engine | Pending |
+| ENG-05 | Phase 4 — Financial Engine | Complete |
+| ENG-06 | Phase 4 — Financial Engine | Complete |
 | ACCT-01 | Phase 5 — Accounts and Pots | Pending |
 | ACCT-02 | Phase 5 — Accounts and Pots | Pending |
 | ACCT-03 | Phase 5 — Accounts and Pots | Pending |
