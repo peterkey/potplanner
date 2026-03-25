@@ -59,7 +59,9 @@ Declared values (multiples of 4 only):
 | 2xl | 48px | Major section breaks (heading to table) |
 | 3xl | 64px | Page-level vertical spacing (not used in Phase 5 minimal layout) |
 
-Exceptions: Touch targets for icon-only buttons (Delete, Edit) must be minimum 44px tall. Use `size="icon"` variant from shadcn Button which renders at 40px — supplement with `min-h-[44px]` on mobile breakpoints.
+Exceptions:
+- Touch targets for icon-only buttons (Delete, Edit) must be minimum 44px tall. Use `size="icon"` variant from shadcn Button which renders at 40px — supplement with `min-h-[44px]` on mobile breakpoints.
+- **Nav height: 56px** (14 × 4px). Declared as an explicit exception to the standard token set. Justification: 56px is the minimum comfortable touch target height for a full-width top nav bar; it balances compactness with accessibility on mobile viewports. This value does not appear in the token table above and must not be used for other spacing purposes.
 
 ---
 
@@ -68,16 +70,18 @@ Exceptions: Touch targets for icon-only buttons (Delete, Edit) must be minimum 4
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (0.875rem) | 400 (regular) | 1.5 |
-| Label | 14px (0.875rem) | 500 (medium) | 1.4 |
+| Label | 14px (0.875rem) | 400 (regular) | 1.4 |
 | Heading | 24px (1.5rem) | 600 (semibold) | 1.2 |
-| Display | 28px (1.75rem) | 700 (bold) | 1.15 |
+| Display | 28px (1.75rem) | 600 (semibold) | 1.15 |
+
+Declared weights: **400 (regular)** and **600 (semibold)** only. No other weights permitted this phase.
 
 Notes:
 - Body is the default prose and table cell size. Geist renders cleanly at 14px.
-- Label applies to form labels, table column headers, and summary rows ("Total:", "Allocated:").
+- Label applies to form labels, table column headers, and summary rows ("Total:", "Allocated:"). Distinguishable from Body by context and color (`--muted-foreground`), not by weight.
 - Heading applies to page-level `<h1>` elements ("Accounts", "Pots") and dialog titles.
 - Display applies to the total balance figure on the accounts page and the allocation counter on the pots page (e.g. "£2,450.00").
-- Monetary amounts in table cells use body size (14px) at regular weight. Total rows use label weight (500).
+- Monetary amounts in table cells use Body size (14px) at regular weight (400). Total rows use regular weight — visual distinction comes from the label color and layout position, not weight.
 - All font sizes use `rem` units to respect user browser preferences.
 
 Source: Geist font confirmed in `globals.css` (`--font-sans`). Sizes are defaults.
@@ -129,7 +133,7 @@ Source: CSS variables confirmed in `src/app/globals.css`.
 | Delete confirmation heading | Delete account? |
 | Delete confirmation body | This will permanently delete "{account name}". This cannot be undone. |
 | Delete confirm button | Delete account |
-| Delete cancel button | Cancel |
+| Delete cancel button | Keep account |
 | Submit button (create) | Add account |
 | Submit button (edit) | Save changes |
 | Total row label | Total |
@@ -139,6 +143,8 @@ Source: CSS variables confirmed in `src/app/globals.css`.
 | Error — delete failed | Failed to delete account. Please try again. |
 | Pending state (submit) | Saving... |
 | Pending state (delete) | Deleting... |
+| aria-label — Edit button | Edit {account name} |
+| aria-label — Delete button | Delete {account name} |
 
 ### Pots Page
 
@@ -164,10 +170,11 @@ Source: CSS variables confirmed in `src/app/globals.css`.
 | Reset confirmation heading | Reset all pot allocations? |
 | Reset confirmation body | This will set all pot allocations to £0.00. Your pot names and settings will be kept. |
 | Reset confirm button | Reset allocations |
-| Reset cancel button | Cancel |
+| Reset cancel button | Keep allocations |
 | Delete confirmation heading | Delete pot? |
 | Delete confirmation body | This will permanently delete "{pot name}". This cannot be undone. |
 | Delete confirm button | Delete pot |
+| Delete cancel button | Keep pot |
 | Submit button (create) | Add pot |
 | Submit button (edit) | Save changes |
 | Error — name required | Pot name is required |
@@ -178,6 +185,8 @@ Source: CSS variables confirmed in `src/app/globals.css`.
 | Pending state (submit) | Saving... |
 | Pending state (reset) | Resetting... |
 | Income persistence note | Income resets when you reload the page. Persistent income settings arrive in a future update. |
+| aria-label — Edit button | Edit {pot name} |
+| aria-label — Delete button | Delete {pot name} |
 
 ### Navigation (added to `(app)/layout.tsx`)
 
@@ -263,7 +272,7 @@ Minimal horizontal top nav bar:
 - Left: app name "PotPlanner" (bold, primary color)
 - Center/Right: nav links — Accounts | Pots
 - Active link: underline or left border indicator in primary violet
-- Height: 56px (14 × 4px units)
+- Height: 56px (declared spacing exception — see Spacing Scale)
 - Background: `--sidebar` (near-white, `oklch(0.985 0 0)`)
 - Bottom border: `--border` (light grey)
 
