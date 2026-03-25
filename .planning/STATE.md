@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 04-financial-engine 04-01-PLAN.md
-last_updated: "2026-03-25T10:21:21.187Z"
+stopped_at: Completed 04-financial-engine 04-02-PLAN.md
+last_updated: "2026-03-25T10:25:25.870Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 44
 ---
 
@@ -60,6 +60,7 @@ Progress: [████░░░░░░] 44%
 | Phase 03-authentication P02 | 3 | 2 tasks | 5 files |
 | Phase 03-authentication P03 | 134 | 2 tasks | 7 files |
 | Phase 04-financial-engine P01 | 3 | 2 tasks | 6 files |
+| Phase 04-financial-engine P02 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 03-authentication]: e2e/ excluded from Vitest glob — Playwright test.describe() incompatible with Vitest globals
 - [Phase 04-financial-engine]: decimal.js used inside function bodies only — public signatures accept and return plain integers (pence)
 - [Phase 04-financial-engine]: bills.ts stub created for getMonthlyBillCost so income.ts can compile; real implementation in Plan 02
+- [Phase 04-financial-engine]: Stable baseline pattern for monthly/annual bills: addMonths(base, i) from original nextDueDate, never chaining from previous occurrence — prevents date drift
+- [Phase 04-financial-engine]: endOfMonth returns 23:59:59.999 so bill dates at midnight compare correctly as <= endDate boundary
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T10:21:21.182Z
-Stopped at: Completed 04-financial-engine 04-01-PLAN.md
+Last session: 2026-03-25T10:25:25.862Z
+Stopped at: Completed 04-financial-engine 04-02-PLAN.md
 Resume file: None
