@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: CI/CD and Test Infrastructure** - GitHub Actions pipeline (lint, type-check, test, build) and Playwright E2E infrastructure wired to CI (completed 2026-03-24)
 - [x] **Phase 3: Authentication** - Shared household login, JWT with httpOnly cookie, Redis blacklist logout, rate limiting, DAL session guard (completed 2026-03-24)
 - [x] **Phase 4: Financial Engine** - Pure TypeScript engine (lib/engine/) — income, disposable income, pot allocation, bill forecasting, full Vitest suite (completed 2026-03-25)
-- [ ] **Phase 5: Accounts and Pots** - DAL + API + UI for bank accounts and budget pots with income allocation
+- [x] **Phase 5: Accounts and Pots** - DAL + API + UI for bank accounts and budget pots with income allocation (completed 2026-04-20)
 - [ ] **Phase 6: Bills** - DAL + API + UI for bills CRUD, recurring cadence, potless bills, joint splits, upcoming bills panel
 - [ ] **Phase 7: Transfer History and Reporting** - Transfer history log with filtering, spending donut chart, Clearbit payee logos
 - [ ] **Phase 8: Debt Tracking and Savings Goals** - Debt entries with avalanche/snowball strategies and payoff projections; savings goals linked to pots
@@ -96,7 +96,7 @@ Plans:
   3. Pot balance (allocated minus spent) is displayed per pot and updates when bills are marked paid
   4. Pots reset to zero at the start of each month (zero-based budgeting); rollover field exists in the schema for v2
   5. All DAL functions for accounts and pots call `verifySession()` before executing any query
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
 - [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
@@ -176,7 +176,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 3/3 | Complete   | 2026-03-24 |
 | 4. Financial Engine | 3/3 | Complete   | 2026-03-25 |
-| 5. Accounts and Pots | 1/3 | In Progress|  |
+| 5. Accounts and Pots | 3/3 | Complete   | 2026-04-20 |
 | 6. Bills | 0/TBD | Not started | - |
 | 7. Transfer History and Reporting | 0/TBD | Not started | - |
 | 8. Debt Tracking and Savings Goals | 0/TBD | Not started | - |

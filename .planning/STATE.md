@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-accounts-and-pots-01-PLAN.md
-last_updated: "2026-04-20T10:26:30.572Z"
+stopped_at: Completed 05-accounts-and-pots-02-PLAN.md
+last_updated: "2026-04-20T10:31:59.713Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 15
   percent: 44
 ---
 
@@ -63,6 +63,8 @@ Progress: [████░░░░░░] 44%
 | Phase 04-financial-engine P02 | 2 | 1 tasks | 2 files |
 | Phase 04-financial-engine P03 | 7 | 2 tasks | 3 files |
 | Phase 05-accounts-and-pots P01 | 3 | 3 tasks | 14 files |
+| Phase 05-accounts-and-pots P02 | 2 | 2 tasks | 3 files |
+| Phase 05-accounts-and-pots P03 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +108,10 @@ Recent decisions affecting current work:
 - [Phase 05-accounts-and-pots]: updatePotAllocationAction accepts (id, allocationPounds) directly for inline pot table row editing — not via FormData
 - [Phase 05-accounts-and-pots]: Delete actions accept (id: number) directly for .bind(null, id) client invocation pattern instead of useActionState
 - [Phase 05-accounts-and-pots]: shadcn Switch submits 'on' when checked; rollover parsed as formData.get('rollover') === 'on'
+- [Phase 05-accounts-and-pots]: AccountRow extracted as sub-component to isolate per-row deletePending state in account-list.tsx
+- [Phase 05-accounts-and-pots]: Server Component page passes data to Client Component list pattern established for accounts and pots pages
+- [Phase 05-accounts-and-pots]: Income stored in client useState only (phase 5 limitation); no DB persistence until future phase
+- [Phase 05-accounts-and-pots]: Balance display uses getPotBalance(allocatedPence, 0) with spentPence=0 — Phase 6 will wire real spent amount
 
 ### Pending Todos
 
@@ -120,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T10:26:30.563Z
-Stopped at: Completed 05-accounts-and-pots-01-PLAN.md
+Last session: 2026-04-20T10:31:59.703Z
+Stopped at: Completed 05-accounts-and-pots-02-PLAN.md
 Resume file: None
