@@ -96,7 +96,7 @@ Plans:
   3. Pot balance (allocated minus spent) is displayed per pot and updates when bills are marked paid
   4. Pots reset to zero at the start of each month (zero-based budgeting); rollover field exists in the schema for v2
   5. All DAL functions for accounts and pots call `verifySession()` before executing any query
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 05-01-PLAN.md — Install shadcn components, create DAL + Server Actions for accounts and pots, add nav
 - [ ] 05-02-PLAN.md — Accounts page UI (table, create/edit dialogs, delete confirmation, total row)
@@ -176,7 +176,7 @@ Note: Phase 2 (CI/CD) and Phase 3 (Auth) can proceed in parallel after Phase 1. 
 | 2. CI/CD and Test Infrastructure | 2/2 | Complete   | 2026-03-24 |
 | 3. Authentication | 3/3 | Complete   | 2026-03-24 |
 | 4. Financial Engine | 3/3 | Complete   | 2026-03-25 |
-| 5. Accounts and Pots | 0/3 | In progress | - |
+| 5. Accounts and Pots | 1/3 | In Progress|  |
 | 6. Bills | 0/TBD | Not started | - |
 | 7. Transfer History and Reporting | 0/TBD | Not started | - |
 | 8. Debt Tracking and Savings Goals | 0/TBD | Not started | - |

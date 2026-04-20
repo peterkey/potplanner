@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-25T10:39:49.185Z"
+stopped_at: Completed 05-accounts-and-pots-01-PLAN.md
+last_updated: "2026-04-20T10:26:30.572Z"
 last_activity: 2026-03-18 — Phase 1 Plan 4 complete (CLAUDE.md + MCP config)
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 15
+  completed_plans: 13
   percent: 44
 ---
 
@@ -62,6 +62,7 @@ Progress: [████░░░░░░] 44%
 | Phase 04-financial-engine P01 | 3 | 2 tasks | 6 files |
 | Phase 04-financial-engine P02 | 2 | 1 tasks | 2 files |
 | Phase 04-financial-engine P03 | 7 | 2 tasks | 3 files |
+| Phase 05-accounts-and-pots P01 | 3 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 04-financial-engine]: forecastMonths uses getBillOccurrences directly rather than calculateDisposableIncome to avoid double-counting and keep forecast self-contained
 - [Phase 04-financial-engine]: index.ts barrel has no server-only — engine is the explicit CLAUDE.md exception, safe for both server and client
 - [Phase 04-financial-engine]: Decimal arithmetic inside forecastMonths loop prevents float drift across multi-month cumulative balance compounding
+- [Phase 05-accounts-and-pots]: updatePotAllocationAction accepts (id, allocationPounds) directly for inline pot table row editing — not via FormData
+- [Phase 05-accounts-and-pots]: Delete actions accept (id: number) directly for .bind(null, id) client invocation pattern instead of useActionState
+- [Phase 05-accounts-and-pots]: shadcn Switch submits 'on' when checked; rollover parsed as formData.get('rollover') === 'on'
 
 ### Pending Todos
 
@@ -116,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T10:39:49.178Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-accounts-and-pots/05-CONTEXT.md
+Last session: 2026-04-20T10:26:30.563Z
+Stopped at: Completed 05-accounts-and-pots-01-PLAN.md
+Resume file: None
