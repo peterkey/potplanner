@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createPot, updatePot, deletePot, resetAllPotAllocations, updatePotAllocation } from '@/lib/dal/pots'
+import { resetAllBillsPaid } from '@/lib/dal/bills'
 
 export type PotActionState = { error?: string; success?: boolean }
 
@@ -64,7 +65,9 @@ export async function deletePotAction(id: number): Promise<PotActionState> {
 export async function resetPotAllocationsAction(): Promise<PotActionState> {
   try {
     await resetAllPotAllocations()
+    await resetAllBillsPaid()
     revalidatePath('/pots')
+    revalidatePath('/bills')
     return { success: true }
   } catch {
     return { error: 'Failed to reset allocations. Please try again.' }

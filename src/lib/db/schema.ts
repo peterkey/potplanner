@@ -49,6 +49,7 @@ export const bills = pgTable('bills', {
   frequency: frequencyEnum('frequency').notNull(),
   potId: integer('pot_id').references(() => pots.id), // nullable = potless bill
   nextDueDate: timestamp('next_due_date').notNull(),
+  isPaid: boolean('is_paid').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
