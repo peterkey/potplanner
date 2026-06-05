@@ -23,6 +23,9 @@ export function BillLogo({ name, size = 24 }: BillLogoProps) {
     )
   }
 
+  // Note: the guessed domain is sent to Clearbit's CDN (third-party logo service).
+  // referrerPolicy prevents leaking the page URL via Referer header.
+  // Trade-off accepted for a self-hosted personal tool; remove if logo fetch is unwanted.
   return (
     // eslint-disable-next-line @next/next-eslint/no-img-element
     <img
@@ -30,6 +33,7 @@ export function BillLogo({ name, size = 24 }: BillLogoProps) {
       alt={name}
       width={size}
       height={size}
+      referrerPolicy="no-referrer"
       className="rounded-full shrink-0 object-contain"
       onError={() => setHasError(true)}
     />
