@@ -40,6 +40,7 @@ interface BillFormProps {
   pots: Pot[]
   accounts: Account[]
   defaultPotId?: number | null
+  defaultAccountId?: number | null
   onClose: () => void
 }
 
@@ -62,7 +63,8 @@ function toDateInputValue(date: Date): string {
 function deriveInitialAccountId(
   bill: BillFormProps['bill'],
   pots: Pot[],
-  defaultPotId?: number | null
+  defaultPotId?: number | null,
+  defaultAccountId?: number | null
 ): string {
   if (bill?.accountId) return bill.accountId.toString()
   const potId = bill?.potId ?? defaultPotId
@@ -70,10 +72,11 @@ function deriveInitialAccountId(
     const pot = pots.find((p) => p.id === potId)
     if (pot?.accountId) return pot.accountId.toString()
   }
+  if (defaultAccountId) return defaultAccountId.toString()
   return 'none'
 }
 
-export function BillForm({ bill, pots, accounts, defaultPotId, onClose }: BillFormProps) {
+export function BillForm({ bill, pots, accounts, defaultPotId, defaultAccountId, onClose }: BillFormProps) {
   const action = bill ? updateBillAction : createBillAction
   const [state, formAction, pending] = useActionState<BillActionState, FormData>(
     action,
@@ -81,7 +84,7 @@ export function BillForm({ bill, pots, accounts, defaultPotId, onClose }: BillFo
   )
   const [splits, setSplits] = useState<BillSplit[]>(bill?.splits ?? [])
 
-  const initialAccountId = deriveInitialAccountId(bill, pots, defaultPotId)
+  const initialAccountId = deriveInitialAccountId(bill, pots, defaultPotId, defaultAccountId)
   const initialPotId = bill?.potId?.toString() ?? defaultPotId?.toString() ?? 'none'
 
   const [selectedAccountId, setSelectedAccountId] = useState(initialAccountId)

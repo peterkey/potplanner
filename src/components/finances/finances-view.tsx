@@ -44,7 +44,8 @@ export function FinancesView({ accounts, pots, bills }: Props) {
   const [editAccount, setEditAccount] = useState<Account | null>(null)
   const [createPotFor, setCreatePotFor] = useState<number | null | undefined>(undefined) // undefined = closed
   const [editPot, setEditPot] = useState<Pot | null>(null)
-  const [createBillFor, setCreateBillFor] = useState<number | null | undefined>(undefined) // undefined = closed
+  const [createBillFor, setCreateBillFor] = useState<number | null | undefined>(undefined) // pot ID, undefined = closed
+  const [createAccountBillFor, setCreateAccountBillFor] = useState<number | undefined>(undefined) // account ID, undefined = closed
   const [editBill, setEditBill] = useState<Bill | null>(null)
 
   const potsByAccount = useMemo(() => {
@@ -67,8 +68,21 @@ export function FinancesView({ accounts, pots, bills }: Props) {
     return map
   }, [bills])
 
+  // Bills with no pot, grouped by their account
+  const accountDirectBills = useMemo(() => {
+    const map = new Map<number | null, Bill[]>()
+    for (const bill of bills) {
+      if (bill.potId !== null) continue
+      const key = bill.accountId ?? null
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(bill)
+    }
+    return map
+  }, [bills])
+
   const unassignedPots = potsByAccount.get(null) ?? []
-  const unlinkedBills = billsByPot.get(null) ?? []
+  // Bills with neither pot nor account (truly orphaned)
+  const unlinkedBills = accountDirectBills.get(null) ?? []
 
   return (
     <div className="px-8 py-8 max-w-3xl">
@@ -119,6 +133,10 @@ export function FinancesView({ accounts, pots, bills }: Props) {
                 <p className="text-[13px] font-bold tracking-tight">{account.name}</p>
               </div>
               <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1.5 text-muted-foreground" onClick={() => setCreateAccountBillFor(account.id)}>
+                  <Plus className="h-3 w-3" />
+                  Add bill
+                </Button>
                 <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1.5 text-muted-foreground" onClick={() => setCreatePotFor(account.id)}>
                   <Plus className="h-3 w-3" />
                   Add pot
@@ -163,12 +181,27 @@ export function FinancesView({ accounts, pots, bills }: Props) {
               </div>
             )}
 
-            {acctPots.length === 0 && (
+            {acctPots.length === 0 && (accountDirectBills.get(account.id) ?? []).length === 0 && (
               <div className="border-t border-border/40 px-5 py-4 text-center">
-                <p className="text-[12px] text-muted-foreground/60">No pots in this account yet.</p>
+                <p className="text-[12px] text-muted-foreground/60">No pots or bills in this account yet.</p>
                 <button onClick={() => setCreatePotFor(account.id)} className="text-[12px] text-primary hover:underline mt-0.5">
                   Add first pot
                 </button>
+              </div>
+            )}
+
+            {/* Account-level bills (no pot) */}
+            {(accountDirectBills.get(account.id) ?? []).length > 0 && (
+              <div className="border-t border-border/40">
+                <div className="flex items-center gap-2 px-5 py-2 bg-muted/10">
+                  <Receipt size={12} className="text-muted-foreground/60" />
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Direct bills</p>
+                </div>
+                <div className="divide-y divide-border/20">
+                  {(accountDirectBills.get(account.id) ?? []).map((bill) => (
+                    <BillRow key={bill.id} bill={bill} allPots={pots} onEdit={() => setEditBill(bill)} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -255,6 +288,14 @@ export function FinancesView({ accounts, pots, bills }: Props) {
           accounts={accounts}
           defaultPotId={createBillFor ?? null}
           onClose={() => setCreateBillFor(undefined)}
+        />
+      </Dialog>
+      <Dialog open={createAccountBillFor !== undefined} onOpenChange={(o) => !o && setCreateAccountBillFor(undefined)}>
+        <BillForm
+          pots={pots}
+          accounts={accounts}
+          defaultAccountId={createAccountBillFor ?? null}
+          onClose={() => setCreateAccountBillFor(undefined)}
         />
       </Dialog>
       <Dialog open={editBill !== null} onOpenChange={(o) => !o && setEditBill(null)}>
