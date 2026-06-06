@@ -36,6 +36,7 @@ export const accounts = pgTable('accounts', {
 
 export const pots = pgTable('pots', {
   id: serial('id').primaryKey(),
+  accountId: integer('account_id').references(() => accounts.id),
   name: varchar('name', { length: 255 }).notNull(),
   allocatedPence: integer('allocated_pence').notNull().default(0),
   rollover: boolean('rollover').notNull().default(false), // v2-ready
@@ -47,7 +48,8 @@ export const bills = pgTable('bills', {
   name: varchar('name', { length: 255 }).notNull(),
   amountPence: integer('amount_pence').notNull(),
   frequency: frequencyEnum('frequency').notNull(),
-  potId: integer('pot_id').references(() => pots.id), // nullable = potless bill
+  potId: integer('pot_id').references(() => pots.id),
+  accountId: integer('account_id').references(() => accounts.id),
   nextDueDate: timestamp('next_due_date').notNull(),
   isPaid: boolean('is_paid').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -79,6 +81,14 @@ export const debts = pgTable('debts', {
   interestRate: integer('interest_rate').notNull(), // basis points (2500 = 25.00%)
   minimumPaymentPence: integer('minimum_payment_pence').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const paySettings = pgTable('pay_settings', {
+  id: serial('id').primaryKey(),
+  amountPence: integer('amount_pence').notNull().default(0),
+  frequency: varchar('frequency', { length: 20 }).notNull().default('monthly'),
+  nextPayDate: timestamp('next_pay_date').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
 export const savingsGoals = pgTable('savings_goals', {

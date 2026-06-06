@@ -26,13 +26,14 @@ export async function createBill(
   amountPence: number,
   frequency: BillFrequency,
   potId: number | null,
+  accountId: number | null,
   nextDueDate: Date,
   splits: Array<{ memberName: string; percentage: number }>
 ) {
   await verifySession()
   const [bill] = await db
     .insert(bills)
-    .values({ name, amountPence, frequency, potId, nextDueDate })
+    .values({ name, amountPence, frequency, potId, accountId, nextDueDate })
     .returning()
   if (splits.length > 0) {
     await db.insert(billSplits).values(
@@ -48,13 +49,14 @@ export async function updateBill(
   amountPence: number,
   frequency: BillFrequency,
   potId: number | null,
+  accountId: number | null,
   nextDueDate: Date,
   splits: Array<{ memberName: string; percentage: number }>
 ) {
   await verifySession()
   const [bill] = await db
     .update(bills)
-    .set({ name, amountPence, frequency, potId, nextDueDate })
+    .set({ name, amountPence, frequency, potId, accountId, nextDueDate })
     .where(eq(bills.id, id))
     .returning()
   await db.delete(billSplits).where(eq(billSplits.billId, id))
@@ -79,7 +81,7 @@ export async function markBillPaid(id: number) {
   await db.update(bills).set({ isPaid: true }).where(eq(bills.id, id))
   await db.insert(transferHistory).values({
     sourceType: bill.potId ? 'pot' : 'account',
-    sourceId: bill.potId ?? null,
+    sourceId: bill.potId ?? bill.accountId,
     destinationType: 'external',
     destinationId: null,
     amountPence: bill.amountPence,
@@ -97,7 +99,7 @@ export async function markBillUnpaid(id: number) {
     sourceType: 'external',
     sourceId: null,
     destinationType: bill.potId ? 'pot' : 'account',
-    destinationId: bill.potId ?? null,
+    destinationId: bill.potId ?? bill.accountId,
     amountPence: bill.amountPence,
     description: `Reversed: ${bill.name}`,
   })

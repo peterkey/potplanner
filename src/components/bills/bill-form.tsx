@@ -10,9 +10,15 @@ import { Separator } from '@/components/ui/separator'
 import { Plus, Trash2 } from 'lucide-react'
 import { createBillAction, updateBillAction, type BillActionState } from '@/app/actions/bills'
 
+interface Account {
+  id: number
+  name: string
+}
+
 interface Pot {
   id: number
   name: string
+  accountId: number | null
 }
 
 interface BillSplit {
@@ -27,10 +33,13 @@ interface BillFormProps {
     amountPence: number
     frequency: string
     potId: number | null
+    accountId: number | null
     nextDueDate: Date
     splits?: BillSplit[]
   } | null
   pots: Pot[]
+  accounts: Account[]
+  defaultPotId?: number | null
   onClose: () => void
 }
 
@@ -50,7 +59,21 @@ function toDateInputValue(date: Date): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
-export function BillForm({ bill, pots, onClose }: BillFormProps) {
+function deriveInitialAccountId(
+  bill: BillFormProps['bill'],
+  pots: Pot[],
+  defaultPotId?: number | null
+): string {
+  if (bill?.accountId) return bill.accountId.toString()
+  const potId = bill?.potId ?? defaultPotId
+  if (potId) {
+    const pot = pots.find((p) => p.id === potId)
+    if (pot?.accountId) return pot.accountId.toString()
+  }
+  return 'none'
+}
+
+export function BillForm({ bill, pots, accounts, defaultPotId, onClose }: BillFormProps) {
   const action = bill ? updateBillAction : createBillAction
   const [state, formAction, pending] = useActionState<BillActionState, FormData>(
     action,
@@ -58,9 +81,24 @@ export function BillForm({ bill, pots, onClose }: BillFormProps) {
   )
   const [splits, setSplits] = useState<BillSplit[]>(bill?.splits ?? [])
 
+  const initialAccountId = deriveInitialAccountId(bill, pots, defaultPotId)
+  const initialPotId = bill?.potId?.toString() ?? defaultPotId?.toString() ?? 'none'
+
+  const [selectedAccountId, setSelectedAccountId] = useState(initialAccountId)
+  const [selectedPotId, setSelectedPotId] = useState(initialPotId)
+
+  const potsForAccount = pots.filter(
+    (p) => selectedAccountId !== 'none' && p.accountId === parseInt(selectedAccountId)
+  )
+
   useEffect(() => {
     if (state.success) onClose()
   }, [state.success, onClose])
+
+  function handleAccountChange(value: string) {
+    setSelectedAccountId(value)
+    setSelectedPotId('none')
+  }
 
   function addSplit() {
     setSplits((prev) => [...prev, { memberName: '', percentage: 0 }])
@@ -86,6 +124,8 @@ export function BillForm({ bill, pots, onClose }: BillFormProps) {
       <form action={formAction} className="space-y-4">
         {bill && <input type="hidden" name="id" value={bill.id} />}
         <input type="hidden" name="splits" value={JSON.stringify(splits)} />
+        <input type="hidden" name="accountId" value={selectedPotId !== 'none' ? 'none' : selectedAccountId} />
+        <input type="hidden" name="potId" value={selectedPotId} />
 
         <div className="space-y-1">
           <Label htmlFor="bill-name">Bill name</Label>
@@ -140,14 +180,32 @@ export function BillForm({ bill, pots, onClose }: BillFormProps) {
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="bill-pot">Assign to pot</Label>
-          <Select name="potId" defaultValue={bill?.potId?.toString() ?? 'none'}>
+          <Label htmlFor="bill-account">Account</Label>
+          <Select value={selectedAccountId} onValueChange={handleAccountChange}>
+            <SelectTrigger id="bill-account">
+              <SelectValue placeholder="Select account" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id.toString()}>{account.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="bill-pot">Pot (optional)</Label>
+          <Select
+            value={selectedPotId}
+            onValueChange={setSelectedPotId}
+            disabled={selectedAccountId === 'none'}
+          >
             <SelectTrigger id="bill-pot">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None (potless)</SelectItem>
-              {pots.map((pot) => (
+              <SelectItem value="none">No pot (direct from account)</SelectItem>
+              {potsForAccount.map((pot) => (
                 <SelectItem key={pot.id} value={pot.id.toString()}>{pot.name}</SelectItem>
               ))}
             </SelectContent>

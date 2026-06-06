@@ -39,6 +39,7 @@ export async function createBillAction(
   const amountPounds = formData.get('amountPounds')?.toString()
   const frequency = formData.get('frequency')?.toString()
   const potIdStr = formData.get('potId')?.toString()
+  const accountIdStr = formData.get('accountId')?.toString()
   const dueDateStr = formData.get('nextDueDate')?.toString()
   const splitsJson = formData.get('splits')?.toString() ?? null
 
@@ -51,6 +52,9 @@ export async function createBillAction(
   if (isNaN(amountPence) || amountPence <= 0) return { error: 'Enter a valid amount' }
 
   const potId = potIdStr && potIdStr !== 'none' ? parseInt(potIdStr) : null
+  const accountId = accountIdStr && accountIdStr !== 'none' ? parseInt(accountIdStr) : null
+  if (!potId && !accountId) return { error: 'Select an account or pot for this bill' }
+
   const nextDueDate = new Date(dueDateStr)
   if (isNaN(nextDueDate.getTime())) return { error: 'Enter a valid due date' }
 
@@ -60,10 +64,13 @@ export async function createBillAction(
       amountPence,
       frequency as BillFrequency,
       potId,
+      accountId,
       nextDueDate,
       parseSplits(splitsJson)
     )
     revalidatePath('/bills')
+    revalidatePath('/accounts')
+    revalidatePath('/')
     return { success: true }
   } catch {
     return { error: 'Failed to save bill. Please try again.' }
@@ -79,6 +86,7 @@ export async function updateBillAction(
   const amountPounds = formData.get('amountPounds')?.toString()
   const frequency = formData.get('frequency')?.toString()
   const potIdStr = formData.get('potId')?.toString()
+  const accountIdStr = formData.get('accountId')?.toString()
   const dueDateStr = formData.get('nextDueDate')?.toString()
   const splitsJson = formData.get('splits')?.toString() ?? null
 
@@ -92,6 +100,9 @@ export async function updateBillAction(
   if (isNaN(amountPence) || amountPence <= 0) return { error: 'Enter a valid amount' }
 
   const potId = potIdStr && potIdStr !== 'none' ? parseInt(potIdStr) : null
+  const accountId = accountIdStr && accountIdStr !== 'none' ? parseInt(accountIdStr) : null
+  if (!potId && !accountId) return { error: 'Select an account or pot for this bill' }
+
   const nextDueDate = new Date(dueDateStr)
   if (isNaN(nextDueDate.getTime())) return { error: 'Enter a valid due date' }
 
@@ -102,10 +113,12 @@ export async function updateBillAction(
       amountPence,
       frequency as BillFrequency,
       potId,
+      accountId,
       nextDueDate,
       parseSplits(splitsJson)
     )
     revalidatePath('/bills')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to save bill. Please try again.' }
@@ -116,6 +129,7 @@ export async function deleteBillAction(id: number): Promise<BillActionState> {
   try {
     await deleteBill(id)
     revalidatePath('/bills')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to delete bill. Please try again.' }
@@ -126,6 +140,7 @@ export async function markBillPaidAction(id: number): Promise<BillActionState> {
   try {
     await markBillPaid(id)
     revalidatePath('/bills')
+    revalidatePath('/accounts')
     revalidatePath('/history')
     revalidatePath('/')
     return { success: true }
@@ -138,6 +153,7 @@ export async function markBillUnpaidAction(id: number): Promise<BillActionState>
   try {
     await markBillUnpaid(id)
     revalidatePath('/bills')
+    revalidatePath('/accounts')
     revalidatePath('/history')
     revalidatePath('/')
     return { success: true }

@@ -44,6 +44,7 @@ interface Bill {
   amountPence: number
   frequency: string
   potId: number | null
+  accountId: number | null
   nextDueDate: Date
   isPaid: boolean
   createdAt: Date
@@ -53,11 +54,18 @@ interface Bill {
 interface Pot {
   id: number
   name: string
+  accountId: number | null
+}
+
+interface Account {
+  id: number
+  name: string
 }
 
 interface BillListProps {
   bills: Bill[]
   pots: Pot[]
+  accounts: Account[]
 }
 
 const FREQUENCY_LABELS: Record<string, string> = {
@@ -68,9 +76,10 @@ const FREQUENCY_LABELS: Record<string, string> = {
   annual: 'Annual',
 }
 
-function getPotName(potId: number | null, pots: Pot[]): string {
-  if (!potId) return 'Potless'
-  return pots.find((p) => p.id === potId)?.name ?? 'Unknown'
+function getSourceLabel(bill: Bill, pots: Pot[], accounts: Account[]): string {
+  if (bill.potId) return pots.find((p) => p.id === bill.potId)?.name ?? 'Unknown pot'
+  if (bill.accountId) return accounts.find((a) => a.id === bill.accountId)?.name ?? 'Unknown account'
+  return 'Unassigned'
 }
 
 function getUpcomingBills(bills: Bill[], days = 30) {
@@ -98,38 +107,40 @@ function getUpcomingBills(bills: Bill[], days = 30) {
   return upcoming.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
 }
 
-export function BillList({ bills, pots }: BillListProps) {
+export function BillList({ bills, pots, accounts }: BillListProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingBill, setEditingBill] = useState<Bill | null>(null)
 
   const potBills = bills.filter((b) => b.potId !== null)
-  const potlessBills = bills.filter((b) => b.potId === null)
+  const accountBills = bills.filter((b) => b.potId === null)
   const upcoming = getUpcomingBills(bills)
 
   if (bills.length === 0) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Bills</h1>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Bills</h1>
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4" />
             Add bill
           </Button>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <h2 className="text-lg font-semibold mb-2">No bills yet</h2>
-          <p className="text-muted-foreground mb-6">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border">
+            <Plus className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <h2 className="text-sm font-semibold mb-1">No bills yet</h2>
+          <p className="text-xs text-muted-foreground mb-5 max-w-xs">
             Add your first bill to start tracking recurring payments.
           </p>
-          <Button variant="ghost" onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={() => setCreateDialogOpen(true)}>
             Add bill
           </Button>
         </div>
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <BillForm pots={pots} onClose={() => setCreateDialogOpen(false)} />
+          <BillForm pots={pots} accounts={accounts} onClose={() => setCreateDialogOpen(false)} />
         </Dialog>
       </div>
     )
@@ -137,9 +148,9 @@ export function BillList({ bills, pots }: BillListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Bills</h1>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold tracking-tight">Bills</h1>
+        <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Add bill
         </Button>
@@ -150,16 +161,16 @@ export function BillList({ bills, pots }: BillListProps) {
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Pot bills
           </h2>
-          <BillTable bills={potBills} pots={pots} onEdit={setEditingBill} />
+          <BillTable bills={potBills} pots={pots} accounts={accounts} onEdit={setEditingBill} />
         </div>
       )}
 
-      {potlessBills.length > 0 && (
+      {accountBills.length > 0 && (
         <div className="mb-6">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            Potless bills
+            Account bills
           </h2>
-          <BillTable bills={potlessBills} pots={pots} onEdit={setEditingBill} />
+          <BillTable bills={accountBills} pots={pots} accounts={accounts} onEdit={setEditingBill} />
         </div>
       )}
 
@@ -184,7 +195,7 @@ export function BillList({ bills, pots }: BillListProps) {
                     <div>
                       <p className="text-sm font-medium">{bill.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {getPotName(bill.potId, pots)} · {FREQUENCY_LABELS[bill.frequency]}
+                        {getSourceLabel(bill, pots, accounts)} · {FREQUENCY_LABELS[bill.frequency]}
                       </p>
                     </div>
                   </div>
@@ -200,7 +211,7 @@ export function BillList({ bills, pots }: BillListProps) {
       )}
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <BillForm pots={pots} onClose={() => setCreateDialogOpen(false)} />
+        <BillForm pots={pots} accounts={accounts} onClose={() => setCreateDialogOpen(false)} />
       </Dialog>
 
       <Dialog
@@ -210,6 +221,7 @@ export function BillList({ bills, pots }: BillListProps) {
         <BillForm
           bill={editingBill}
           pots={pots}
+          accounts={accounts}
           onClose={() => setEditingBill(null)}
         />
       </Dialog>
@@ -220,10 +232,11 @@ export function BillList({ bills, pots }: BillListProps) {
 interface BillTableProps {
   bills: Bill[]
   pots: Pot[]
+  accounts: Account[]
   onEdit: (bill: Bill) => void
 }
 
-function BillTable({ bills, pots, onEdit }: BillTableProps) {
+function BillTable({ bills, pots, accounts, onEdit }: BillTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -231,7 +244,7 @@ function BillTable({ bills, pots, onEdit }: BillTableProps) {
           <TableHead>Name</TableHead>
           <TableHead>Amount</TableHead>
           <TableHead>Frequency</TableHead>
-          <TableHead>Pot</TableHead>
+          <TableHead>Source</TableHead>
           <TableHead>Next due</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
@@ -239,7 +252,7 @@ function BillTable({ bills, pots, onEdit }: BillTableProps) {
       </TableHeader>
       <TableBody>
         {bills.map((bill) => (
-          <BillRow key={bill.id} bill={bill} pots={pots} onEdit={() => onEdit(bill)} />
+          <BillRow key={bill.id} bill={bill} pots={pots} accounts={accounts} onEdit={() => onEdit(bill)} />
         ))}
       </TableBody>
     </Table>
@@ -249,10 +262,11 @@ function BillTable({ bills, pots, onEdit }: BillTableProps) {
 interface BillRowProps {
   bill: Bill
   pots: Pot[]
+  accounts: Account[]
   onEdit: () => void
 }
 
-function BillRow({ bill, pots, onEdit }: BillRowProps) {
+function BillRow({ bill, pots, accounts, onEdit }: BillRowProps) {
   const [pending, setPending] = useState(false)
 
   async function handleDelete() {
@@ -288,7 +302,7 @@ function BillRow({ bill, pots, onEdit }: BillRowProps) {
       </TableCell>
       <TableCell>£{(bill.amountPence / 100).toFixed(2)}</TableCell>
       <TableCell>{FREQUENCY_LABELS[bill.frequency]}</TableCell>
-      <TableCell>{getPotName(bill.potId, pots)}</TableCell>
+      <TableCell>{getSourceLabel(bill, pots, accounts)}</TableCell>
       <TableCell>{format(new Date(bill.nextDueDate), 'd MMM yyyy')}</TableCell>
       <TableCell>
         {bill.isPaid ? (
