@@ -1,7 +1,10 @@
 import { verifySession } from '@/lib/auth/session'
+import { getHouseholdMembers } from '@/lib/dal/household-members'
+import { getCurrentUser } from '@/lib/dal/user'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { NavLink } from '@/components/nav-link'
+import { Sidebar } from '@/components/sidebar'
+import { BottomNav } from '@/components/bottom-nav'
+import { MemberProvider } from '@/lib/context/member-context'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   try {
@@ -9,25 +12,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } catch {
     redirect('/login')
   }
+
+  const [members, user] = await Promise.all([
+    getHouseholdMembers(),
+    getCurrentUser(),
+  ])
+
+  const userInitial = user?.email?.[0]?.toUpperCase() ?? 'U'
+
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-border bg-sidebar">
-        <div className="flex h-14 items-center px-4 md:px-6 gap-6">
-          <Link href="/" className="text-lg font-semibold text-primary shrink-0">
-            PotPlanner
-          </Link>
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-            <NavLink href="/">Dashboard</NavLink>
-            <NavLink href="/accounts">Accounts</NavLink>
-            <NavLink href="/pots">Pots</NavLink>
-            <NavLink href="/bills">Bills</NavLink>
-            <NavLink href="/history">History</NavLink>
-            <NavLink href="/debts">Debts</NavLink>
-            <NavLink href="/savings">Savings</NavLink>
-          </div>
-        </div>
-      </nav>
-      <main className="max-w-5xl mx-auto">{children}</main>
-    </div>
+    <MemberProvider>
+      <div className="flex h-[100dvh] overflow-hidden">
+        <Sidebar members={members} userInitial={userInitial} />
+        <main className="flex-1 overflow-y-auto bg-background pb-16 md:pb-0">
+          {children}
+        </main>
+      </div>
+      <BottomNav />
+    </MemberProvider>
   )
 }
