@@ -39,9 +39,6 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="elevation-2 px-7 py-8">
-          <p className="t-caption uppercase tracking-[0.16em] text-muted-foreground mb-6">
-            Sign in to your account
-          </p>
           <LoginForm />
         </div>
       </div>
