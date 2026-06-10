@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useMemo, type CSSProperties } from 'react'
+import { useState, useMemo } from 'react'
+import { useMember } from '@/lib/context/member-context'
 import { format } from 'date-fns'
-import { Plus, Pencil, Trash2, Check, X, CreditCard, PiggyBank, Receipt } from 'lucide-react'
+import { Plus, Pencil, Trash2, CreditCard, PiggyBank, Receipt, TrendingDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Dialog } from '@/components/ui/dialog'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -15,31 +15,55 @@ import { PotForm } from '@/components/pots/pot-form'
 import { BillForm } from '@/components/bills/bill-form'
 import { deleteAccountAction } from '@/app/actions/accounts'
 import { deletePotAction } from '@/app/actions/pots'
-import { deleteBillAction, markBillPaidAction, markBillUnpaidAction } from '@/app/actions/bills'
+import { deleteBillAction } from '@/app/actions/bills'
 import { BillLogo } from '@/components/bill-logo'
 
-interface Account { id: number; name: string }
+interface AccountShare { memberId: number; memberName: string; defaultPercentage: number }
+interface Account { id: number; name: string; ownerId: number | null; ownerName: string | null; shares: AccountShare[] }
 interface Pot { id: number; name: string; allocatedPence: number; rollover: boolean; accountId: number | null }
-interface Split { id: number; memberName: string; percentage: number }
-interface Bill { id: number; name: string; amountPence: number; frequency: string; potId: number | null; accountId: number | null; nextDueDate: Date; isPaid: boolean; splits: Split[] }
+interface Split { id: number; memberId: number; memberName: string; percentage: number }
+interface Bill { id: number; name: string; amountPence: number; frequency: string; potId: number | null; accountId: number | null; nextDueDate: Date; splits: Split[] }
+interface Debt { id: number; name: string; minimumPaymentPence: number; paymentDueDate: Date | null; accountId: number | null; potId: number | null }
+interface Member { id: number; name: string }
 
 interface Props {
   accounts: Account[]
   pots: Pot[]
   bills: Bill[]
+  debts: Debt[]
+  members: Member[]
 }
 
 const FREQUENCY_LABELS: Record<string, string> = {
   weekly: 'Weekly', biweekly: 'Every 2 wks', four_weekly: 'Every 4 wks', monthly: 'Monthly', annual: 'Annual',
 }
 
-const ACCOUNT_COLORS = ['#7c3aed', '#FF5555', '#14B8A6', '#3B82F6', '#F59E0B', '#EC4899']
+const ACCOUNT_COLORS = ['#FF3B30', '#00B9A9', '#FFC800', '#14233C', '#E8634A', '#3EC9BA']
 
 function fmt(pence: number) {
   return `£${(pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-export function FinancesView({ accounts, pots, bills }: Props) {
+function getMemberBillAmount(bill: Bill, activeMemberId: number | null): number {
+  if (!activeMemberId || bill.splits.length === 0) return bill.amountPence
+  const split = bill.splits.find((s) => s.memberId === activeMemberId)
+  if (!split) return bill.amountPence
+  return Math.round(bill.amountPence * split.percentage / 100)
+}
+
+function isBillRelevantToMember(bill: Bill, activeMemberId: number | null): boolean {
+  if (!activeMemberId || bill.splits.length === 0) return true
+  return bill.splits.some((s) => s.memberId === activeMemberId)
+}
+
+export function FinancesView({ accounts, pots, bills, debts, members }: Props) {
+  const { activeMemberId } = useMember()
+  const visibleAccounts = activeMemberId
+    ? accounts.filter(
+        (a) => a.ownerId === activeMemberId || a.shares.some((s) => s.memberId === activeMemberId)
+      )
+    : accounts
+
   const [createAccountOpen, setCreateAccountOpen] = useState(false)
   const [editAccount, setEditAccount] = useState<Account | null>(null)
   const [createPotFor, setCreatePotFor] = useState<number | null | undefined>(undefined) // undefined = closed
@@ -80,18 +104,67 @@ export function FinancesView({ accounts, pots, bills }: Props) {
     return map
   }, [bills])
 
-  const unassignedPots = potsByAccount.get(null) ?? []
-  // Bills with neither pot nor account (truly orphaned)
-  const unlinkedBills = accountDirectBills.get(null) ?? []
+  // Debts grouped by potId (for pot-level) and accountId (for account-level direct)
+  const debtsByPot = useMemo(() => {
+    const map = new Map<number, Debt[]>()
+    for (const debt of debts) {
+      if (debt.potId === null) continue
+      if (!map.has(debt.potId)) map.set(debt.potId, [])
+      map.get(debt.potId)!.push(debt)
+    }
+    return map
+  }, [debts])
+
+  const accountDirectDebts = useMemo(() => {
+    const map = new Map<number, Debt[]>()
+    for (const debt of debts) {
+      if (debt.potId !== null || debt.accountId === null) continue
+      if (!map.has(debt.accountId)) map.set(debt.accountId, [])
+      map.get(debt.accountId)!.push(debt)
+    }
+    return map
+  }, [debts])
+
+  const allUnassignedPots = potsByAccount.get(null) ?? []
+  const allUnlinkedBills = accountDirectBills.get(null) ?? []
+
+  // When a member is active, only show pots/bills that have at least one bill relevant to that member
+  const unassignedPots = activeMemberId
+    ? allUnassignedPots.filter((pot) =>
+        (billsByPot.get(pot.id) ?? []).some((b) => isBillRelevantToMember(b, activeMemberId))
+      )
+    : allUnassignedPots
+  const unlinkedBills = activeMemberId
+    ? allUnlinkedBills.filter((b) => isBillRelevantToMember(b, activeMemberId))
+    : allUnlinkedBills
+
+  const visibleAccountIds = useMemo(() => new Set(visibleAccounts.map((a) => a.id)), [visibleAccounts])
+
+  const visiblePotsCount = useMemo(() => {
+    const accountPotsCount = pots.filter((p) => p.accountId !== null && visibleAccountIds.has(p.accountId)).length
+    return accountPotsCount + unassignedPots.length
+  }, [pots, visibleAccountIds, unassignedPots])
+
+  const visibleBillsCount = useMemo(() => {
+    const visiblePotIds = new Set(
+      pots.filter((p) => p.accountId !== null && visibleAccountIds.has(p.accountId)).map((p) => p.id),
+    )
+    unassignedPots.forEach((p) => visiblePotIds.add(p.id))
+    return bills.filter((b) => {
+      if (b.potId !== null) return visiblePotIds.has(b.potId)
+      if (b.accountId !== null) return visibleAccountIds.has(b.accountId)
+      return isBillRelevantToMember(b, activeMemberId)
+    }).length
+  }, [bills, pots, visibleAccountIds, unassignedPots, activeMemberId])
 
   return (
     <div className="px-8 py-8 max-w-3xl">
       {/* Header */}
-      <div className="animate-reveal-up flex items-center justify-between mb-8" style={{ '--delay': '0ms' } as CSSProperties}>
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Accounts</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {accounts.length} account{accounts.length !== 1 ? 's' : ''} · {pots.length} pot{pots.length !== 1 ? 's' : ''} · {bills.length} bill{bills.length !== 1 ? 's' : ''}
+          <h1 className="t-h1">Accounts</h1>
+          <p className="t-body text-muted-foreground mt-0.5">
+            {visibleAccounts.length} account{visibleAccounts.length !== 1 ? 's' : ''} · {visiblePotsCount} pot{visiblePotsCount !== 1 ? 's' : ''} · {visibleBillsCount} bill{visibleBillsCount !== 1 ? 's' : ''}
           </p>
         </div>
         <Button size="sm" onClick={() => setCreateAccountOpen(true)}>
@@ -101,27 +174,31 @@ export function FinancesView({ accounts, pots, bills }: Props) {
       </div>
 
       {/* Accounts */}
-      {accounts.length === 0 && (
+      {visibleAccounts.length === 0 && (
         <div
-          className="animate-reveal-up flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border py-20 text-center mb-6"
-          style={{ '--delay': '60ms' } as CSSProperties}
+          className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border py-20 text-center mb-6"
         >
           <CreditCard className="h-8 w-8 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-semibold mb-1">No accounts yet</p>
-          <p className="text-xs text-muted-foreground mb-5">Add an account to start organising your pots and bills.</p>
-          <Button variant="outline" size="sm" onClick={() => setCreateAccountOpen(true)}>Add account</Button>
+          <p className="text-sm font-semibold mb-1">
+            {activeMemberId ? 'No accounts for this member' : 'No accounts yet'}
+          </p>
+          <p className="text-xs text-muted-foreground mb-5">
+            {activeMemberId ? 'Switch to "All members" or add an account for this member.' : 'Add an account to start organising your pots and bills.'}
+          </p>
+          {!activeMemberId && (
+            <Button variant="outline" size="sm" onClick={() => setCreateAccountOpen(true)}>Add account</Button>
+          )}
         </div>
       )}
 
-      {accounts.map((account, acctIdx) => {
+      {visibleAccounts.map((account, acctIdx) => {
         const acctPots = potsByAccount.get(account.id) ?? []
         const acctColor = ACCOUNT_COLORS[acctIdx % ACCOUNT_COLORS.length]
 
         return (
           <div
             key={account.id}
-            className="animate-reveal-up card-elevated mb-5 overflow-hidden"
-            style={{ '--delay': `${60 + acctIdx * 40}ms` } as CSSProperties}
+            className="elevation-1 mb-5 overflow-hidden"
           >
             {/* Account header */}
             <div
@@ -130,7 +207,13 @@ export function FinancesView({ accounts, pots, bills }: Props) {
             >
               <div className="flex items-center gap-3">
                 <CreditCard size={16} style={{ color: acctColor }} />
-                <p className="text-[13px] font-bold tracking-tight">{account.name}</p>
+                <div>
+                  <p className="text-[13px] font-bold tracking-tight">{account.name}</p>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    {account.ownerName ?? 'Unassigned'}
+                    {account.shares.length > 0 && ' · Shared'}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1.5 text-muted-foreground" onClick={() => setCreateAccountBillFor(account.id)}>
@@ -172,7 +255,9 @@ export function FinancesView({ accounts, pots, bills }: Props) {
                     key={pot.id}
                     pot={pot}
                     bills={billsByPot.get(pot.id) ?? []}
+                    debts={debtsByPot.get(pot.id) ?? []}
                     allPots={pots}
+                    activeMemberId={activeMemberId}
                     onEditPot={() => setEditPot(pot)}
                     onAddBill={() => setCreateBillFor(pot.id)}
                     onEditBill={setEditBill}
@@ -190,8 +275,8 @@ export function FinancesView({ accounts, pots, bills }: Props) {
               </div>
             )}
 
-            {/* Account-level bills (no pot) */}
-            {(accountDirectBills.get(account.id) ?? []).length > 0 && (
+            {/* Account-level bills and debts (no pot) */}
+            {((accountDirectBills.get(account.id) ?? []).length > 0 || (accountDirectDebts.get(account.id) ?? []).length > 0) && (
               <div className="border-t border-border/40">
                 <div className="flex items-center gap-2 px-5 py-2 bg-muted/10">
                   <Receipt size={12} className="text-muted-foreground/60" />
@@ -199,7 +284,10 @@ export function FinancesView({ accounts, pots, bills }: Props) {
                 </div>
                 <div className="divide-y divide-border/20">
                   {(accountDirectBills.get(account.id) ?? []).map((bill) => (
-                    <BillRow key={bill.id} bill={bill} allPots={pots} onEdit={() => setEditBill(bill)} />
+                    <BillRow key={bill.id} bill={bill} allPots={pots} activeMemberId={activeMemberId} onEdit={() => setEditBill(bill)} />
+                  ))}
+                  {(accountDirectDebts.get(account.id) ?? []).map((debt) => (
+                    <DebtPaymentRow key={debt.id} debt={debt} />
                   ))}
                 </div>
               </div>
@@ -210,7 +298,7 @@ export function FinancesView({ accounts, pots, bills }: Props) {
 
       {/* Unassigned pots */}
       {unassignedPots.length > 0 && (
-        <div className="animate-reveal-up card-elevated mb-5 overflow-hidden" style={{ '--delay': '200ms' } as CSSProperties}>
+        <div className="elevation-1 mb-5 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-l-4 border-l-muted-foreground/30">
             <div className="flex items-center gap-3">
               <PiggyBank size={16} className="text-muted-foreground/50" />
@@ -227,7 +315,9 @@ export function FinancesView({ accounts, pots, bills }: Props) {
                 key={pot.id}
                 pot={pot}
                 bills={billsByPot.get(pot.id) ?? []}
+                debts={debtsByPot.get(pot.id) ?? []}
                 allPots={pots}
+                activeMemberId={activeMemberId}
                 onEditPot={() => setEditPot(pot)}
                 onAddBill={() => setCreateBillFor(pot.id)}
                 onEditBill={setEditBill}
@@ -239,7 +329,7 @@ export function FinancesView({ accounts, pots, bills }: Props) {
 
       {/* Unlinked bills */}
       {unlinkedBills.length > 0 && (
-        <div className="animate-reveal-up card-elevated mb-5 overflow-hidden" style={{ '--delay': '240ms' } as CSSProperties}>
+        <div className="elevation-1 mb-5 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-l-4 border-l-muted-foreground/20">
             <div className="flex items-center gap-3">
               <Receipt size={16} className="text-muted-foreground/50" />
@@ -252,7 +342,7 @@ export function FinancesView({ accounts, pots, bills }: Props) {
           </div>
           <div className="border-t border-border/40 divide-y divide-border/30">
             {unlinkedBills.map((bill) => (
-              <BillRow key={bill.id} bill={bill} allPots={pots} onEdit={() => setEditBill(bill)} />
+              <BillRow key={bill.id} bill={bill} allPots={pots} activeMemberId={activeMemberId} onEdit={() => setEditBill(bill)} />
             ))}
           </div>
         </div>
@@ -260,17 +350,17 @@ export function FinancesView({ accounts, pots, bills }: Props) {
 
       {/* Add bill button when nothing unlinked exists yet */}
       {unlinkedBills.length === 0 && bills.length === 0 && pots.length === 0 && accounts.length > 0 && (
-        <div className="animate-reveal-up text-center py-4" style={{ '--delay': '200ms' } as CSSProperties}>
+        <div className="text-center py-4">
           <p className="text-sm text-muted-foreground">Add pots to your accounts, then add bills to your pots.</p>
         </div>
       )}
 
       {/* Dialogs */}
       <Dialog open={createAccountOpen} onOpenChange={setCreateAccountOpen}>
-        <AccountForm onClose={() => setCreateAccountOpen(false)} />
+        <AccountForm members={members} onClose={() => setCreateAccountOpen(false)} />
       </Dialog>
       <Dialog open={editAccount !== null} onOpenChange={(o) => !o && setEditAccount(null)}>
-        <AccountForm account={editAccount} onClose={() => setEditAccount(null)} />
+        <AccountForm account={editAccount} members={members} onClose={() => setEditAccount(null)} />
       </Dialog>
       <Dialog open={createPotFor !== undefined} onOpenChange={(o) => !o && setCreatePotFor(undefined)}>
         <PotForm
@@ -286,6 +376,7 @@ export function FinancesView({ accounts, pots, bills }: Props) {
         <BillForm
           pots={pots}
           accounts={accounts}
+          members={members}
           defaultPotId={createBillFor ?? null}
           onClose={() => setCreateBillFor(undefined)}
         />
@@ -294,12 +385,13 @@ export function FinancesView({ accounts, pots, bills }: Props) {
         <BillForm
           pots={pots}
           accounts={accounts}
+          members={members}
           defaultAccountId={createAccountBillFor ?? null}
           onClose={() => setCreateAccountBillFor(undefined)}
         />
       </Dialog>
       <Dialog open={editBill !== null} onOpenChange={(o) => !o && setEditBill(null)}>
-        <BillForm bill={editBill} pots={pots} accounts={accounts} onClose={() => setEditBill(null)} />
+        <BillForm bill={editBill} pots={pots} accounts={accounts} members={members} onClose={() => setEditBill(null)} />
       </Dialog>
     </div>
   )
@@ -308,14 +400,16 @@ export function FinancesView({ accounts, pots, bills }: Props) {
 interface PotSectionProps {
   pot: Pot
   bills: Bill[]
+  debts: Debt[]
   allPots: Pot[]
+  activeMemberId: number | null
   onEditPot: () => void
   onAddBill: () => void
   onEditBill: (bill: Bill) => void
 }
 
-function PotSection({ pot, bills, allPots, onEditPot, onAddBill, onEditBill }: PotSectionProps) {
-  const totalBillsPence = bills.reduce((s, b) => s + b.amountPence, 0)
+function PotSection({ pot, bills, debts, allPots, activeMemberId, onEditPot, onAddBill, onEditBill }: PotSectionProps) {
+  const totalBillsPence = bills.reduce((s, b) => s + getMemberBillAmount(b, activeMemberId), 0) + debts.reduce((s, d) => s + d.minimumPaymentPence, 0)
 
   return (
     <div className="group">
@@ -325,12 +419,12 @@ function PotSection({ pot, bills, allPots, onEditPot, onAddBill, onEditBill }: P
           <PiggyBank size={13} className="text-primary/70 shrink-0" />
           <p className="text-[12px] font-semibold text-foreground">{pot.name}</p>
           {pot.allocatedPence > 0 && (
-            <span className="text-[11px] text-muted-foreground tabular-nums">{fmt(pot.allocatedPence)}/mo</span>
+            <span className="text-[11px] text-muted-foreground tabular-nums font-money">{fmt(pot.allocatedPence)}/mo</span>
           )}
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {totalBillsPence > 0 && (
-            <span className="text-[11px] text-muted-foreground tabular-nums mr-2">{fmt(totalBillsPence)}</span>
+            <span className="text-[11px] text-muted-foreground tabular-nums font-money mr-2">{fmt(totalBillsPence)}</span>
           )}
           <button onClick={onAddBill} className="flex items-center gap-1 h-6 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 rounded-md transition-colors">
             <Plus className="h-3 w-3" />
@@ -359,16 +453,19 @@ function PotSection({ pot, bills, allPots, onEditPot, onAddBill, onEditBill }: P
         </div>
       </div>
 
-      {/* Bills under this pot */}
-      {bills.length > 0 && (
+      {/* Bills and debts under this pot */}
+      {(bills.length > 0 || debts.length > 0) && (
         <div className="divide-y divide-border/20">
           {bills.map((bill) => (
-            <BillRow key={bill.id} bill={bill} allPots={allPots} onEdit={() => onEditBill(bill)} />
+            <BillRow key={bill.id} bill={bill} allPots={allPots} activeMemberId={activeMemberId} onEdit={() => onEditBill(bill)} />
+          ))}
+          {debts.map((debt) => (
+            <DebtPaymentRow key={debt.id} debt={debt} />
           ))}
         </div>
       )}
 
-      {bills.length === 0 && (
+      {bills.length === 0 && debts.length === 0 && (
         <div className="px-8 py-2">
           <button onClick={onAddBill} className="text-[11px] text-muted-foreground/50 hover:text-primary transition-colors">
             + Add first bill
@@ -379,21 +476,38 @@ function PotSection({ pot, bills, allPots, onEditPot, onAddBill, onEditBill }: P
   )
 }
 
+function DebtPaymentRow({ debt }: { debt: Debt }) {
+  const dueDateLabel = debt.paymentDueDate
+    ? format(new Date(debt.paymentDueDate), 'd MMM yyyy')
+    : null
+
+  return (
+    <div className="flex items-center justify-between px-8 py-2.5 hover:bg-muted/10 transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-destructive/10 shrink-0">
+          <TrendingDown className="h-3 w-3 text-destructive" />
+        </div>
+        <div>
+          <p className="text-[12px] font-medium">{debt.name}</p>
+          <p className="text-[11px] text-muted-foreground">
+            Monthly · min. payment{dueDateLabel ? ` · due ${dueDateLabel}` : ''}
+          </p>
+        </div>
+      </div>
+      <span className="text-[12px] font-semibold tabular-nums font-money">{fmt(debt.minimumPaymentPence)}</span>
+    </div>
+  )
+}
+
 interface BillRowProps {
   bill: Bill
   allPots: Pot[]
+  activeMemberId: number | null
   onEdit: () => void
 }
 
-function BillRow({ bill, allPots: _allPots, onEdit }: BillRowProps) {
+function BillRow({ bill, allPots: _allPots, activeMemberId, onEdit }: BillRowProps) {
   const [pending, setPending] = useState(false)
-
-  async function handleTogglePaid() {
-    setPending(true)
-    if (bill.isPaid) await markBillUnpaidAction(bill.id)
-    else await markBillPaidAction(bill.id)
-    setPending(false)
-  }
 
   async function handleDelete() {
     setPending(true)
@@ -402,11 +516,11 @@ function BillRow({ bill, allPots: _allPots, onEdit }: BillRowProps) {
   }
 
   return (
-    <div className={`group flex items-center justify-between px-8 py-2.5 hover:bg-muted/10 transition-colors ${bill.isPaid ? 'opacity-50' : ''}`}>
+    <div className="group flex items-center justify-between px-8 py-2.5 hover:bg-muted/10 transition-colors">
       <div className="flex items-center gap-3">
         <BillLogo name={bill.name} size={24} />
         <div>
-          <p className={`text-[12px] font-medium ${bill.isPaid ? 'line-through text-muted-foreground' : ''}`}>
+          <p className="text-[12px] font-medium">
             {bill.name}
           </p>
           <p className="text-[11px] text-muted-foreground">
@@ -415,20 +529,8 @@ function BillRow({ bill, allPots: _allPots, onEdit }: BillRowProps) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-[12px] font-semibold tabular-nums mr-1">{fmt(bill.amountPence)}</span>
-        {bill.isPaid ? (
-          <Badge variant="success" className="text-[10px] px-1.5 py-0">Paid</Badge>
-        ) : (
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">Due</Badge>
-        )}
+        <span className="text-[12px] font-semibold tabular-nums font-money mr-1">{fmt(getMemberBillAmount(bill, activeMemberId))}</span>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleTogglePaid}
-            disabled={pending}
-            className={`flex h-6 w-6 items-center justify-center rounded-md transition-colors ${bill.isPaid ? 'text-muted-foreground hover:bg-muted' : 'text-green-600 hover:bg-green-50'}`}
-          >
-            {bill.isPaid ? <X className="h-3 w-3" /> : <Check className="h-3 w-3" />}
-          </button>
           <button onClick={onEdit} className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
             <Pencil className="h-3 w-3" />
           </button>
