@@ -96,41 +96,6 @@ Migrations run automatically before the app starts. Open **http://localhost** an
 
 ---
 
-## Development
-
-### With Docker (recommended)
-
-```bash
-git clone https://github.com/peterkey/potplanner.git
-cd potplanner
-cp .env.example .env
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-```
-
-App runs at **http://localhost:3000** with hot reload.
-
-### Without Docker
-
-Requires local PostgreSQL and Redis.
-
-```bash
-npm install
-npm run db:migrate
-npm run dev
-```
-
-### Useful commands
-
-```bash
-npm run type-check      # TypeScript check
-npm test                # Vitest unit tests
-npm run db:generate     # Generate migration after schema changes
-npm run db:migrate      # Apply pending migrations
-npm run db:studio       # Drizzle Studio at localhost:4983
-```
-
----
-
 ## Configuration
 
 | Variable | Required | Description |
@@ -149,5 +114,3 @@ npm run db:studio       # Drizzle Studio at localhost:4983
 - `transfer_history` is an **append-only ledger** — balances are derived by summing entries
 - Sessions use JWT in an httpOnly cookie, invalidated via Redis blacklist on logout
 - Every data access function calls `verifySession()` — the proxy layer is redirect-only, not a security gate
-
-See [CLAUDE.md](CLAUDE.md) for full project conventions.
