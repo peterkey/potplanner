@@ -26,6 +26,13 @@ export async function getAllUsers(): Promise<typeof users.$inferSelect[]> {
   return db.select().from(users).orderBy(users.createdAt)
 }
 
+export async function getAllUsersSafe() {
+  return db
+    .select({ id: users.id, email: users.email, isAdmin: users.isAdmin, createdAt: users.createdAt })
+    .from(users)
+    .orderBy(users.createdAt)
+}
+
 export async function createUser(
   email: string,
   passwordHash: string,

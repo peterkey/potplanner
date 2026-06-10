@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { verifyAdminSession } from '@/lib/auth/session'
-import { getAllUsers } from '@/lib/dal/auth'
+import { getAllUsersSafe } from '@/lib/dal/auth'
 
 export async function GET() {
   try {
@@ -9,13 +9,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const users = await getAllUsers()
-  return NextResponse.json(
-    users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      isAdmin: u.isAdmin,
-      createdAt: u.createdAt,
-    }))
-  )
+  const users = await getAllUsersSafe()
+  return NextResponse.json(users)
 }

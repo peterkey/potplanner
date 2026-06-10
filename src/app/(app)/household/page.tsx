@@ -1,5 +1,5 @@
 import { getHouseholdMembers } from '@/lib/dal/household-members'
-import { getAllUsers, getUserById } from '@/lib/dal/auth'
+import { getAllUsersSafe, getUserById } from '@/lib/dal/auth'
 import { verifySession } from '@/lib/auth/session'
 import { MemberList } from '@/components/household/member-list'
 import { UserAccountsList } from '@/components/household/user-accounts-list'
@@ -14,7 +14,7 @@ export default async function HouseholdPage() {
   const currentUser = await getUserById(userId)
   const isAdmin = currentUser?.isAdmin ?? false
 
-  const users = isAdmin ? await getAllUsers() : []
+  const users = isAdmin ? await getAllUsersSafe() : []
 
   return (
     <PageTransition>
