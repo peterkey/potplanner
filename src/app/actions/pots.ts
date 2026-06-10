@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { createPot, updatePot, deletePot, resetAllPotAllocations, updatePotAllocation } from '@/lib/dal/pots'
-import { resetAllBillsPaid } from '@/lib/dal/bills'
 
 export type PotActionState = { error?: string; success?: boolean }
 
@@ -13,15 +12,19 @@ export async function createPotAction(
   const name = formData.get('name')?.toString().trim()
   const allocationPounds = formData.get('allocationPounds')?.toString()
   const rollover = formData.get('rollover') === 'on'
+  const accountIdStr = formData.get('accountId')?.toString()
 
   if (!name) return { error: 'Pot name is required' }
 
   const allocatedPence = Math.round(parseFloat(allocationPounds ?? '0') * 100)
   if (isNaN(allocatedPence)) return { error: 'Enter a valid allocation amount' }
 
+  const accountId = accountIdStr && accountIdStr !== '' && accountIdStr !== 'none' ? Number(accountIdStr) : null
+
   try {
-    await createPot(name, allocatedPence, rollover)
+    await createPot(name, allocatedPence, rollover, accountId)
     revalidatePath('/pots')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to save pot. Please try again.' }
@@ -36,6 +39,7 @@ export async function updatePotAction(
   const name = formData.get('name')?.toString().trim()
   const allocationPounds = formData.get('allocationPounds')?.toString()
   const rollover = formData.get('rollover') === 'on'
+  const accountIdStr = formData.get('accountId')?.toString()
 
   if (!name) return { error: 'Pot name is required' }
   if (!id || isNaN(id)) return { error: 'Invalid pot' }
@@ -43,9 +47,12 @@ export async function updatePotAction(
   const allocatedPence = Math.round(parseFloat(allocationPounds ?? '0') * 100)
   if (isNaN(allocatedPence)) return { error: 'Enter a valid allocation amount' }
 
+  const accountId = accountIdStr && accountIdStr !== '' && accountIdStr !== 'none' ? Number(accountIdStr) : null
+
   try {
-    await updatePot(id, name, allocatedPence, rollover)
+    await updatePot(id, name, allocatedPence, rollover, accountId)
     revalidatePath('/pots')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to save pot. Please try again.' }
@@ -56,6 +63,7 @@ export async function deletePotAction(id: number): Promise<PotActionState> {
   try {
     await deletePot(id)
     revalidatePath('/pots')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to delete pot. Please try again.' }
@@ -65,8 +73,8 @@ export async function deletePotAction(id: number): Promise<PotActionState> {
 export async function resetPotAllocationsAction(): Promise<PotActionState> {
   try {
     await resetAllPotAllocations()
-    await resetAllBillsPaid()
     revalidatePath('/pots')
+    revalidatePath('/accounts')
     revalidatePath('/bills')
     return { success: true }
   } catch {
@@ -86,6 +94,7 @@ export async function updatePotAllocationAction(
   try {
     await updatePotAllocation(id, allocatedPence)
     revalidatePath('/pots')
+    revalidatePath('/accounts')
     return { success: true }
   } catch {
     return { error: 'Failed to update allocation. Please try again.' }

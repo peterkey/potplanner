@@ -36,6 +36,7 @@ export function BillLogo({ name, size = 24 }: BillLogoProps) {
       referrerPolicy="no-referrer"
       className="rounded-full shrink-0 object-contain"
       onError={() => setHasError(true)}
+      suppressHydrationWarning
     />
   )
 }

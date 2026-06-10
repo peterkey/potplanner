@@ -1,4 +1,5 @@
 export type BillFrequency = 'weekly' | 'biweekly' | 'four_weekly' | 'monthly' | 'annual'
+export type PayFrequency = 'weekly' | 'biweekly' | 'four_weekly' | 'monthly'
 
 export interface Pot {
   id: number
@@ -13,6 +14,7 @@ export interface Bill {
   amountPence: number
   frequency: BillFrequency
   potId: number | null
+  accountId?: number | null
   nextDueDate: Date
 }
 
@@ -36,6 +38,17 @@ export interface ForecastInput {
 export interface ForecastMonth {
   year: number
   month: number // 1-12
+  incomePence: number
+  billsDue: BillOccurrence[]
+  totalBillsPence: number
+  potAllocationsPence: number
+  disposableIncomePence: number
+  cumulativeBalancePence: number
+}
+
+export interface PayPeriodForecast {
+  periodStart: Date
+  periodEnd: Date
   incomePence: number
   billsDue: BillOccurrence[]
   totalBillsPence: number

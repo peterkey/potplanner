@@ -9,16 +9,16 @@ export async function getPots() {
   return db.select().from(pots).orderBy(pots.createdAt)
 }
 
-export async function createPot(name: string, allocatedPence: number, rollover: boolean) {
+export async function createPot(name: string, allocatedPence: number, rollover: boolean, accountId: number | null) {
   await verifySession()
-  const [pot] = await db.insert(pots).values({ name, allocatedPence, rollover }).returning()
+  const [pot] = await db.insert(pots).values({ name, allocatedPence, rollover, accountId }).returning()
   return pot
 }
 
-export async function updatePot(id: number, name: string, allocatedPence: number, rollover: boolean) {
+export async function updatePot(id: number, name: string, allocatedPence: number, rollover: boolean, accountId: number | null) {
   await verifySession()
   const [pot] = await db.update(pots)
-    .set({ name, allocatedPence, rollover })
+    .set({ name, allocatedPence, rollover, accountId })
     .where(eq(pots.id, id))
     .returning()
   return pot

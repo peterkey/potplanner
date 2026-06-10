@@ -13,12 +13,16 @@ export async function createDebt(
   name: string,
   balancePence: number,
   interestRate: number,
-  minimumPaymentPence: number
+  minimumPaymentPence: number,
+  paymentDueDate: Date | null,
+  accountId: number | null,
+  potId: number | null,
+  memberId: number | null
 ) {
   await verifySession()
   const [debt] = await db
     .insert(debts)
-    .values({ name, balancePence, interestRate, minimumPaymentPence })
+    .values({ name, balancePence, interestRate, minimumPaymentPence, paymentDueDate, accountId, potId, memberId })
     .returning()
   return debt
 }
@@ -28,12 +32,16 @@ export async function updateDebt(
   name: string,
   balancePence: number,
   interestRate: number,
-  minimumPaymentPence: number
+  minimumPaymentPence: number,
+  paymentDueDate: Date | null,
+  accountId: number | null,
+  potId: number | null,
+  memberId: number | null
 ) {
   await verifySession()
   const [debt] = await db
     .update(debts)
-    .set({ name, balancePence, interestRate, minimumPaymentPence })
+    .set({ name, balancePence, interestRate, minimumPaymentPence, paymentDueDate, accountId, potId, memberId })
     .where(eq(debts.id, id))
     .returning()
   return debt

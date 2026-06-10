@@ -71,8 +71,8 @@ export function TransferHistoryList({ entries, donutSlices, month }: TransferHis
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Transfer History</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold tracking-tight">History</h1>
       </div>
 
       {donutSlices.length > 0 && (
@@ -115,7 +115,7 @@ export function TransferHistoryList({ entries, donutSlices, month }: TransferHis
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <h2 className="text-lg font-semibold mb-2">No transactions yet</h2>
           <p className="text-muted-foreground">
-            Transactions are recorded automatically when you mark bills as paid.
+            Transactions will appear here as they are recorded.
           </p>
         </div>
       ) : (

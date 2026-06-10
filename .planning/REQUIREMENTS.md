@@ -28,13 +28,13 @@
 
 - [x] **ACCT-01**: User can create, edit, and delete bank accounts
 - [x] **ACCT-02**: User can set and update account balance
-- [ ] **ACCT-03**: User can view all accounts with individual and total balances
+- [x] **ACCT-03**: User can view all accounts with individual and total balances
 
 ### Pots
 
 - [x] **POT-01**: User can create, edit, and delete pots (budget categories)
-- [ ] **POT-02**: User can allocate an income amount to each pot
-- [ ] **POT-03**: User can view pot balance (allocated minus spent)
+- [x] **POT-02**: User can allocate an income amount to each pot
+- [x] **POT-03**: User can view pot balance (allocated minus spent)
 - [x] **POT-04**: Pots reset to zero at the start of each month (zero-based budgeting)
 - [x] **POT-05**: Schema includes rollover field per pot (carry-forward ready for v2, UI deferred)
 
@@ -134,10 +134,10 @@
 | ENG-06 | Phase 4 — Financial Engine | Complete |
 | ACCT-01 | Phase 5 — Accounts and Pots | Complete |
 | ACCT-02 | Phase 5 — Accounts and Pots | Complete |
-| ACCT-03 | Phase 5 — Accounts and Pots | Pending |
+| ACCT-03 | Phase 5 — Accounts and Pots | Complete |
 | POT-01 | Phase 5 — Accounts and Pots | Complete |
-| POT-02 | Phase 5 — Accounts and Pots | Pending |
-| POT-03 | Phase 5 — Accounts and Pots | Pending |
+| POT-02 | Phase 5 — Accounts and Pots | Complete |
+| POT-03 | Phase 5 — Accounts and Pots | Complete |
 | POT-04 | Phase 5 — Accounts and Pots | Complete |
 | POT-05 | Phase 5 — Accounts and Pots | Complete |
 | BILL-01 | Phase 6 — Bills | Pending |

@@ -1,0 +1,1 @@
+ALTER TABLE "debts" ADD COLUMN "payment_due_date" timestamp;

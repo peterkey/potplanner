@@ -36,6 +36,55 @@
       "when": 1780777691309,
       "tag": "0004_chubby_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780779796005,
+      "tag": "0005_opposite_tombstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780780529064,
+      "tag": "0006_dry_gressill",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780781345837,
+      "tag": "0007_many_swordsman",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1749254400000,
+      "tag": "0008_member_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780953349384,
+      "tag": "0009_freezing_hammerhead",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780956166653,
+      "tag": "0010_tough_dazzler",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1781098118625,
+      "tag": "0011_redundant_preak",
+      "breakpoints": true
     }
   ]
 }

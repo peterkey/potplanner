@@ -5,6 +5,27 @@ import { createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } from '@/lib/d
 
 export type SavingsGoalActionState = { error?: string; success?: boolean }
 
+function parseContributors(formData: FormData): Array<{ memberId: number; percentage: number }> {
+  const raw = formData.get('contributors')?.toString()
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (c) => typeof c.memberId === 'number' && typeof c.percentage === 'number' && c.percentage > 0
+    )
+  } catch {
+    return []
+  }
+}
+
+function parseGoalDate(formData: FormData): Date | null {
+  const raw = formData.get('goalDate')?.toString()
+  if (!raw) return null
+  const d = new Date(raw)
+  return isNaN(d.getTime()) ? null : d
+}
+
 export async function createSavingsGoalAction(
   _prevState: SavingsGoalActionState,
   formData: FormData
@@ -19,9 +40,13 @@ export async function createSavingsGoalAction(
   if (isNaN(targetPence) || targetPence <= 0) return { error: 'Enter a valid target amount' }
 
   const potId = potIdStr && potIdStr !== 'none' ? parseInt(potIdStr) : null
+  const goalDate = parseGoalDate(formData)
+  const contributors = parseContributors(formData)
+
+  if (contributors.length === 0) return { error: 'Add at least one contributor' }
 
   try {
-    await createSavingsGoal(name, targetPence, potId)
+    await createSavingsGoal(name, targetPence, goalDate, potId, contributors)
     revalidatePath('/savings')
     revalidatePath('/')
     return { success: true }
@@ -46,9 +71,13 @@ export async function updateSavingsGoalAction(
   if (isNaN(targetPence) || targetPence <= 0) return { error: 'Enter a valid target amount' }
 
   const potId = potIdStr && potIdStr !== 'none' ? parseInt(potIdStr) : null
+  const goalDate = parseGoalDate(formData)
+  const contributors = parseContributors(formData)
+
+  if (contributors.length === 0) return { error: 'Add at least one contributor' }
 
   try {
-    await updateSavingsGoal(id, name, targetPence, potId)
+    await updateSavingsGoal(id, name, targetPence, goalDate, potId, contributors)
     revalidatePath('/savings')
     revalidatePath('/')
     return { success: true }

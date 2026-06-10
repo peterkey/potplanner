@@ -1,14 +1,27 @@
 services:
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
   app:
     build:
       context: .
       target: dependencies
     command: npm run dev
+    user: "0"
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
+      - .:/app:z
       - /app/node_modules
       - /app/.next
     environment:
       NODE_ENV: development
+
+  nginx:
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro,z

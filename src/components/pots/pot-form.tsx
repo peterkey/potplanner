@@ -1,21 +1,33 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createPotAction, updatePotAction, type PotActionState } from '@/app/actions/pots'
 
+interface Account {
+  id: number
+  name: string
+}
+
 interface PotFormProps {
-  pot?: { id: number; name: string; allocatedPence: number; rollover: boolean } | null
+  pot?: { id: number; name: string; allocatedPence: number; rollover: boolean; accountId: number | null } | null
+  accounts: Account[]
+  defaultAccountId?: number | null
   onClose: () => void
 }
 
-export function PotForm({ pot, onClose }: PotFormProps) {
+export function PotForm({ pot, accounts, defaultAccountId, onClose }: PotFormProps) {
   const action = pot ? updatePotAction : createPotAction
   const [state, formAction, pending] = useActionState(action, {} as PotActionState)
+
+  const [selectedAccountId, setSelectedAccountId] = useState(
+    pot?.accountId?.toString() ?? defaultAccountId?.toString() ?? 'none'
+  )
 
   useEffect(() => {
     if (state.success) {
@@ -40,6 +52,23 @@ export function PotForm({ pot, onClose }: PotFormProps) {
             defaultValue={pot?.name ?? ''}
             placeholder="e.g. Groceries"
           />
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="pot-account">Account</Label>
+          <Select name="accountId" value={selectedAccountId} onValueChange={setSelectedAccountId}>
+            <SelectTrigger id="pot-account">
+              <SelectValue placeholder="No account" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No account</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id.toString()}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1">

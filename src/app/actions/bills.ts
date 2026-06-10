@@ -1,13 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import {
-  createBill,
-  updateBill,
-  deleteBill,
-  markBillPaid,
-  markBillUnpaid,
-} from '@/lib/dal/bills'
+import { createBill, updateBill, deleteBill } from '@/lib/dal/bills'
 import type { BillFrequency } from '@/lib/engine/types'
 
 export type BillActionState = { error?: string; success?: boolean }
@@ -21,11 +15,11 @@ function parseSplits(splitsJson: string | null) {
     if (!Array.isArray(parsed)) return []
     return parsed.filter(
       (s) =>
-        typeof s.memberName === 'string' &&
-        s.memberName.trim() &&
+        typeof s.memberId === 'number' &&
+        s.memberId > 0 &&
         typeof s.percentage === 'number' &&
         s.percentage > 0
-    )
+    ) as Array<{ memberId: number; percentage: number }>
   } catch {
     return []
   }
@@ -58,16 +52,14 @@ export async function createBillAction(
   const nextDueDate = new Date(dueDateStr)
   if (isNaN(nextDueDate.getTime())) return { error: 'Enter a valid due date' }
 
+  const splits = parseSplits(splitsJson)
+  if (splits.length > 0) {
+    const total = splits.reduce((s, r) => s + r.percentage, 0)
+    if (total !== 100) return { error: 'Split percentages must add up to 100%' }
+  }
+
   try {
-    await createBill(
-      name,
-      amountPence,
-      frequency as BillFrequency,
-      potId,
-      accountId,
-      nextDueDate,
-      parseSplits(splitsJson)
-    )
+    await createBill(name, amountPence, frequency as BillFrequency, potId, accountId, nextDueDate, splits)
     revalidatePath('/bills')
     revalidatePath('/accounts')
     revalidatePath('/')
@@ -106,17 +98,14 @@ export async function updateBillAction(
   const nextDueDate = new Date(dueDateStr)
   if (isNaN(nextDueDate.getTime())) return { error: 'Enter a valid due date' }
 
+  const splits = parseSplits(splitsJson)
+  if (splits.length > 0) {
+    const total = splits.reduce((s, r) => s + r.percentage, 0)
+    if (total !== 100) return { error: 'Split percentages must add up to 100%' }
+  }
+
   try {
-    await updateBill(
-      id,
-      name,
-      amountPence,
-      frequency as BillFrequency,
-      potId,
-      accountId,
-      nextDueDate,
-      parseSplits(splitsJson)
-    )
+    await updateBill(id, name, amountPence, frequency as BillFrequency, potId, accountId, nextDueDate, splits)
     revalidatePath('/bills')
     revalidatePath('/accounts')
     return { success: true }
@@ -136,28 +125,3 @@ export async function deleteBillAction(id: number): Promise<BillActionState> {
   }
 }
 
-export async function markBillPaidAction(id: number): Promise<BillActionState> {
-  try {
-    await markBillPaid(id)
-    revalidatePath('/bills')
-    revalidatePath('/accounts')
-    revalidatePath('/history')
-    revalidatePath('/')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to mark bill as paid.' }
-  }
-}
-
-export async function markBillUnpaidAction(id: number): Promise<BillActionState> {
-  try {
-    await markBillUnpaid(id)
-    revalidatePath('/bills')
-    revalidatePath('/accounts')
-    revalidatePath('/history')
-    revalidatePath('/')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to mark bill as unpaid.' }
-  }
-}

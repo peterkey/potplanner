@@ -1,9 +1,8 @@
 import 'server-only'
 import { verifySession } from '@/lib/auth/session'
 import { db } from '@/lib/db'
-import { bills, billSplits, transferHistory } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { advanceByFrequency } from '@/lib/engine/bills'
+import { bills, billSplits, transferHistory, householdMembers } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import type { BillFrequency } from '@/lib/engine/types'
 
 export async function getBills() {
@@ -14,10 +13,28 @@ export async function getBills() {
 export async function getBillsWithSplits() {
   await verifySession()
   const allBills = await db.select().from(bills).orderBy(bills.nextDueDate)
-  const allSplits = await db.select().from(billSplits)
+  const allSplits = await db
+    .select({
+      id: billSplits.id,
+      billId: billSplits.billId,
+      memberId: billSplits.memberId,
+      memberName: householdMembers.name,
+      percentage: billSplits.percentage,
+    })
+    .from(billSplits)
+    .leftJoin(householdMembers, eq(billSplits.memberId, householdMembers.id))
+
   return allBills.map((bill) => ({
     ...bill,
-    splits: allSplits.filter((s) => s.billId === bill.id),
+    splits: allSplits
+      .filter((s) => s.billId === bill.id && s.memberId !== null)
+      .map((s) => ({
+        id: s.id,
+        billId: s.billId,
+        memberId: s.memberId!,
+        memberName: s.memberName ?? '',
+        percentage: s.percentage,
+      })),
   }))
 }
 
@@ -28,7 +45,7 @@ export async function createBill(
   potId: number | null,
   accountId: number | null,
   nextDueDate: Date,
-  splits: Array<{ memberName: string; percentage: number }>
+  splits: Array<{ memberId: number; percentage: number }>
 ) {
   await verifySession()
   const [bill] = await db
@@ -37,7 +54,7 @@ export async function createBill(
     .returning()
   if (splits.length > 0) {
     await db.insert(billSplits).values(
-      splits.map((s) => ({ billId: bill.id, memberName: s.memberName, percentage: s.percentage }))
+      splits.map((s) => ({ billId: bill.id, memberId: s.memberId, percentage: s.percentage }))
     )
   }
   return bill
@@ -51,7 +68,7 @@ export async function updateBill(
   potId: number | null,
   accountId: number | null,
   nextDueDate: Date,
-  splits: Array<{ memberName: string; percentage: number }>
+  splits: Array<{ memberId: number; percentage: number }>
 ) {
   await verifySession()
   const [bill] = await db
@@ -62,7 +79,7 @@ export async function updateBill(
   await db.delete(billSplits).where(eq(billSplits.billId, id))
   if (splits.length > 0) {
     await db.insert(billSplits).values(
-      splits.map((s) => ({ billId: id, memberName: s.memberName, percentage: s.percentage }))
+      splits.map((s) => ({ billId: id, memberId: s.memberId, percentage: s.percentage }))
     )
   }
   return bill
@@ -74,45 +91,3 @@ export async function deleteBill(id: number) {
   await db.delete(bills).where(eq(bills.id, id))
 }
 
-export async function markBillPaid(id: number) {
-  await verifySession()
-  const [bill] = await db.select().from(bills).where(eq(bills.id, id))
-  if (!bill || bill.isPaid) return
-  await db.update(bills).set({ isPaid: true }).where(eq(bills.id, id))
-  await db.insert(transferHistory).values({
-    sourceType: bill.potId ? 'pot' : 'account',
-    sourceId: bill.potId ?? bill.accountId,
-    destinationType: 'external',
-    destinationId: null,
-    amountPence: bill.amountPence,
-    description: bill.name,
-  })
-}
-
-export async function markBillUnpaid(id: number) {
-  await verifySession()
-  const [bill] = await db.select().from(bills).where(and(eq(bills.id, id), eq(bills.isPaid, true)))
-  if (!bill) return
-  await db.update(bills).set({ isPaid: false }).where(eq(bills.id, id))
-  // Compensating entry (append-only ledger pattern)
-  await db.insert(transferHistory).values({
-    sourceType: 'external',
-    sourceId: null,
-    destinationType: bill.potId ? 'pot' : 'account',
-    destinationId: bill.potId ?? bill.accountId,
-    amountPence: bill.amountPence,
-    description: `Reversed: ${bill.name}`,
-  })
-}
-
-export async function resetAllBillsPaid() {
-  await verifySession()
-  const paidBills = await db.select().from(bills).where(eq(bills.isPaid, true))
-  for (const bill of paidBills) {
-    const nextDate = advanceByFrequency(new Date(bill.nextDueDate), bill.frequency as BillFrequency)
-    await db
-      .update(bills)
-      .set({ isPaid: false, nextDueDate: nextDate })
-      .where(eq(bills.id, bill.id))
-  }
-}
