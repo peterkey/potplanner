@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Target } from 'lucide-react'
+import { useMember } from '@/lib/context/member-context'
+import { format, formatDistanceToNow, isPast } from 'date-fns'
+import { Plus, Pencil, Trash2, Target, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
@@ -19,55 +20,92 @@ import {
 import { Dialog } from '@/components/ui/dialog'
 import { deleteSavingsGoalAction } from '@/app/actions/savings-goals'
 import { SavingsForm } from '@/components/savings/savings-form'
+import { getPeriodsUntilDate, getSavingsContributionPerPeriod } from '@/lib/engine/savings'
+import type { PayFrequency } from '@/lib/engine/types'
 
 interface Pot {
   id: number
   name: string
 }
 
+interface Member {
+  id: number
+  name: string
+}
+
+interface GoalMember {
+  memberId: number
+  memberName: string
+  percentage: number
+}
+
 interface SavingsGoal {
   id: number
   name: string
   targetPence: number
+  goalDate: Date | null
   potId: number | null
+  memberId: number | null
   createdAt: Date
   savedPence: number
+  members: GoalMember[]
+}
+
+interface IncomeRow {
+  memberId: number | null
+  frequency: string
 }
 
 interface SavingsListProps {
   goals: SavingsGoal[]
   pots: Pot[]
+  members: Member[]
+  incomes: IncomeRow[]
 }
 
-export function SavingsList({ goals, pots }: SavingsListProps) {
+function getMemberFrequency(memberId: number | null, incomes: IncomeRow[]): PayFrequency {
+  const income = incomes.find((i) => i.memberId === memberId || i.memberId === null)
+  return (income?.frequency ?? 'monthly') as PayFrequency
+}
+
+export function SavingsList({ goals, pots, members, incomes }: SavingsListProps) {
+  const { activeMemberId } = useMember()
+  const visibleGoals = activeMemberId
+    ? goals.filter((g) =>
+        g.members.some((m) => m.memberId === activeMemberId) ||
+        (g.members.length === 0 && g.memberId === activeMemberId)
+      )
+    : goals
+
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null)
 
-  if (goals.length === 0) {
+  if (visibleGoals.length === 0) {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Savings Goals</h1>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <h1 className="t-h1">Savings Goals</h1>
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4" />
             Add goal
           </Button>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Target className="size-10 text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">No savings goals yet</h2>
-          <p className="text-muted-foreground mb-6">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border">
+            <Target className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <h2 className="text-sm font-semibold mb-1">No savings goals yet</h2>
+          <p className="text-xs text-muted-foreground mb-5 max-w-xs">
             Set a savings goal to track your progress toward financial milestones.
           </p>
-          <Button variant="ghost" onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={() => setCreateDialogOpen(true)}>
             Add goal
           </Button>
         </div>
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <SavingsForm pots={pots} onClose={() => setCreateDialogOpen(false)} />
+          <SavingsForm pots={pots} members={members} onClose={() => setCreateDialogOpen(false)} />
         </Dialog>
       </div>
     )
@@ -75,34 +113,42 @@ export function SavingsList({ goals, pots }: SavingsListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Savings Goals</h1>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="t-h1">Savings Goals</h1>
+        <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Add goal
         </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {goals.map((goal) => (
+        {visibleGoals.map((goal) => (
           <GoalCard
             key={goal.id}
             goal={goal}
             pots={pots}
+            incomes={incomes}
+            activeMemberId={activeMemberId}
             onEdit={() => setEditingGoal(goal)}
           />
         ))}
       </div>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <SavingsForm pots={pots} onClose={() => setCreateDialogOpen(false)} />
+        <SavingsForm pots={pots} members={members} onClose={() => setCreateDialogOpen(false)} />
       </Dialog>
 
       <Dialog
         open={editingGoal !== null}
         onOpenChange={(open) => !open && setEditingGoal(null)}
       >
-        <SavingsForm goal={editingGoal} pots={pots} onClose={() => setEditingGoal(null)} />
+        <SavingsForm
+          key={editingGoal?.id ?? 'new'}
+          goal={editingGoal}
+          pots={pots}
+          members={members}
+          onClose={() => setEditingGoal(null)}
+        />
       </Dialog>
     </div>
   )
@@ -111,10 +157,12 @@ export function SavingsList({ goals, pots }: SavingsListProps) {
 interface GoalCardProps {
   goal: SavingsGoal
   pots: Pot[]
+  incomes: IncomeRow[]
+  activeMemberId: number | null
   onEdit: () => void
 }
 
-function GoalCard({ goal, pots, onEdit }: GoalCardProps) {
+function GoalCard({ goal, pots, incomes, activeMemberId, onEdit }: GoalCardProps) {
   const [pending, setPending] = useState(false)
   const potName = pots.find((p) => p.id === goal.potId)?.name
   const pct = goal.targetPence > 0
@@ -122,23 +170,44 @@ function GoalCard({ goal, pots, onEdit }: GoalCardProps) {
     : 0
   const achieved = pct >= 100
 
+  const goalDate = goal.goalDate ? new Date(goal.goalDate) : null
+  const overdue = goalDate ? isPast(goalDate) && !achieved : false
+
   async function handleDelete() {
     setPending(true)
     await deleteSavingsGoalAction(goal.id)
     setPending(false)
   }
 
+  // Per-period contributions: show for active member or for all members
+  const contributionRows = goal.members.length > 0
+    ? (activeMemberId
+        ? goal.members.filter((m) => m.memberId === activeMemberId)
+        : goal.members)
+    : []
+
   return (
-    <div className="rounded-xl border border-border p-5 space-y-3">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold">{goal.name}</h3>
+    <div className="elevation-1 p-5 space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="font-semibold truncate">{goal.name}</h3>
           {potName && (
             <p className="text-xs text-muted-foreground">Linked to: {potName}</p>
           )}
+          {goalDate && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+              <p className={`text-xs ${overdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {overdue
+                  ? `Overdue by ${formatDistanceToNow(goalDate)}`
+                  : format(goalDate, 'd MMM yyyy')}
+              </p>
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {achieved && <Badge variant="success">Achieved!</Badge>}
+          {overdue && !achieved && <Badge variant="destructive">Overdue</Badge>}
           <Button variant="ghost" size="icon" onClick={onEdit}>
             <Pencil className="h-4 w-4" />
           </Button>
@@ -166,16 +235,38 @@ function GoalCard({ goal, pots, onEdit }: GoalCardProps) {
         </div>
       </div>
 
-      <Progress value={pct} />
+      <div className="relative h-3 rounded-full overflow-hidden bg-muted">
+        <div
+          className="h-full rounded-full animate-progress"
+          style={{ width: `${pct}%`, backgroundColor: 'var(--color-success)' }}
+        />
+      </div>
 
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">
-          £{(goal.savedPence / 100).toFixed(2)} saved
-        </span>
-        <span className="font-medium">
-          £{(goal.targetPence / 100).toFixed(2)} target ({pct}%)
+      <div className="flex justify-between items-center">
+        <span className="t-caption text-muted-foreground">{pct}% saved</span>
+        <span className="t-caption font-money text-muted-foreground">
+          £{(goal.savedPence / 100).toFixed(2)} / £{(goal.targetPence / 100).toFixed(2)}
         </span>
       </div>
+
+      {/* Per-period contributions */}
+      {goalDate && !achieved && contributionRows.length > 0 && (
+        <div className="border-t border-border/50 pt-2.5 space-y-1">
+          {contributionRows.map((c) => {
+            const freq = getMemberFrequency(c.memberId, incomes)
+            const periods = getPeriodsUntilDate(goalDate, freq)
+            const perPeriod = getSavingsContributionPerPeriod(goal.targetPence, goal.savedPence, c.percentage, periods)
+            return (
+              <div key={c.memberId} className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{c.memberName} ({c.percentage}%)</span>
+                <span className="font-semibold font-money tabular-nums">
+                  £{(perPeriod / 100).toFixed(2)}<span className="text-muted-foreground font-normal"> / pay</span>
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
