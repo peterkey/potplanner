@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useMember } from '@/lib/context/member-context'
 import { Plus, Pencil, Trash2, TrendingDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,17 +32,28 @@ import { DebtForm } from '@/components/debts/debt-form'
 import { calculateAvalanche, calculateSnowball } from '@/lib/engine/debt'
 import type { DebtInput, DebtPayoffPlan } from '@/lib/engine/debt'
 
+interface Account { id: number; name: string }
+interface Pot { id: number; name: string; accountId: number | null }
+interface Member { id: number; name: string }
+
 interface Debt {
   id: number
   name: string
   balancePence: number
   interestRate: number
   minimumPaymentPence: number
+  paymentDueDate: Date | null
+  accountId: number | null
+  potId: number | null
+  memberId: number | null
   createdAt: Date
 }
 
 interface DebtListProps {
   debts: Debt[]
+  accounts: Account[]
+  pots: Pot[]
+  members: Member[]
 }
 
 function PayoffTimeline({ plan }: { plan: DebtPayoffPlan }) {
@@ -114,11 +126,14 @@ function PayoffTimeline({ plan }: { plan: DebtPayoffPlan }) {
   )
 }
 
-export function DebtList({ debts }: DebtListProps) {
+export function DebtList({ debts, accounts, pots, members }: DebtListProps) {
+  const { activeMemberId } = useMember()
+  const visibleDebts = activeMemberId ? debts.filter((d) => d.memberId === activeMemberId) : debts
+
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
-  const engineDebts: DebtInput[] = debts.map((d) => ({
+  const engineDebts: DebtInput[] = visibleDebts.map((d) => ({
     id: d.id,
     name: d.name,
     balancePence: d.balancePence,
@@ -129,33 +144,34 @@ export function DebtList({ debts }: DebtListProps) {
   const avalanche = calculateAvalanche(engineDebts)
   const snowball = calculateSnowball(engineDebts)
 
-  const totalBalancePence = debts.reduce((s, d) => s + d.balancePence, 0)
+  const totalBalancePence = visibleDebts.reduce((s, d) => s + d.balancePence, 0)
 
-  if (debts.length === 0) {
+  if (visibleDebts.length === 0) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Debts</h1>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="t-h1">Debts</h1>
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4" />
             Add debt
           </Button>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <TrendingDown className="size-10 text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">No debts tracked</h2>
-          <p className="text-muted-foreground mb-6">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border">
+            <TrendingDown className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <h2 className="text-sm font-semibold mb-1">No debts tracked</h2>
+          <p className="text-xs text-muted-foreground mb-5 max-w-xs">
             Add your debts to calculate payoff strategies and track your progress.
           </p>
-          <Button variant="ghost" onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={() => setCreateDialogOpen(true)}>
             Add debt
           </Button>
         </div>
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DebtForm onClose={() => setCreateDialogOpen(false)} />
+          <DebtForm accounts={accounts} pots={pots} members={members} onClose={() => setCreateDialogOpen(false)} />
         </Dialog>
       </div>
     )
@@ -163,14 +179,17 @@ export function DebtList({ debts }: DebtListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold">Debts</h1>
+          <h1 className="t-h1">Debts</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Total: £{(totalBalancePence / 100).toFixed(2)}
+            Total:{' '}
+            <span className="font-semibold font-money text-destructive">
+              £{(totalBalancePence / 100).toFixed(2)}
+            </span>
           </p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+        <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Add debt
         </Button>
@@ -183,11 +202,12 @@ export function DebtList({ debts }: DebtListProps) {
             <TableHead>Balance</TableHead>
             <TableHead>Interest rate</TableHead>
             <TableHead>Min. payment</TableHead>
+            <TableHead>Due date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {debts.map((debt) => (
+          {visibleDebts.map((debt) => (
             <DebtRow key={debt.id} debt={debt} onEdit={() => setEditingDebt(debt)} />
           ))}
         </TableBody>
@@ -196,7 +216,7 @@ export function DebtList({ debts }: DebtListProps) {
       <Separator className="my-6" />
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Payoff strategies</h2>
+        <h2 className="t-h2 mb-4">Payoff strategies</h2>
         <Tabs defaultValue="avalanche">
           <TabsList>
             <TabsTrigger value="avalanche">Avalanche</TabsTrigger>
@@ -222,14 +242,14 @@ export function DebtList({ debts }: DebtListProps) {
       </div>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DebtForm onClose={() => setCreateDialogOpen(false)} />
+        <DebtForm accounts={accounts} pots={pots} members={members} onClose={() => setCreateDialogOpen(false)} />
       </Dialog>
 
       <Dialog
         open={editingDebt !== null}
         onOpenChange={(open) => !open && setEditingDebt(null)}
       >
-        <DebtForm debt={editingDebt} onClose={() => setEditingDebt(null)} />
+        <DebtForm key={editingDebt?.id ?? 'new'} debt={editingDebt} accounts={accounts} pots={pots} members={members} onClose={() => setEditingDebt(null)} />
       </Dialog>
     </div>
   )
@@ -252,9 +272,14 @@ function DebtRow({ debt, onEdit }: DebtRowProps) {
   return (
     <TableRow>
       <TableCell>{debt.name}</TableCell>
-      <TableCell className="font-medium">£{(debt.balancePence / 100).toFixed(2)}</TableCell>
+      <TableCell className="font-medium font-money">£{(debt.balancePence / 100).toFixed(2)}</TableCell>
       <TableCell>{(debt.interestRate / 100).toFixed(2)}%</TableCell>
-      <TableCell>£{(debt.minimumPaymentPence / 100).toFixed(2)}</TableCell>
+      <TableCell className="font-money">£{(debt.minimumPaymentPence / 100).toFixed(2)}</TableCell>
+      <TableCell className="text-sm">
+        {debt.paymentDueDate
+          ? new Date(debt.paymentDueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : <span className="text-muted-foreground">—</span>}
+      </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
           <Button

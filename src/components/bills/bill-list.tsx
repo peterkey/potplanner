@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
-import { Plus, Pencil, Trash2, Check, X, Calendar } from 'lucide-react'
+import { Plus, Pencil, Trash2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -26,14 +25,16 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Dialog } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { deleteBillAction, markBillPaidAction, markBillUnpaidAction } from '@/app/actions/bills'
+import { deleteBillAction } from '@/app/actions/bills'
 import { BillForm } from '@/components/bills/bill-form'
 import { BillLogo } from '@/components/bill-logo'
 import { getBillOccurrences } from '@/lib/engine/bills'
 import type { Bill as EngineBill, BillFrequency } from '@/lib/engine/types'
+import { useMember } from '@/lib/context/member-context'
 
 interface Split {
   id: number
+  memberId: number
   memberName: string
   percentage: number
 }
@@ -46,7 +47,6 @@ interface Bill {
   potId: number | null
   accountId: number | null
   nextDueDate: Date
-  isPaid: boolean
   createdAt: Date
   splits: Split[]
 }
@@ -57,7 +57,15 @@ interface Pot {
   accountId: number | null
 }
 
+interface AccountShare { memberId: number; memberName: string; defaultPercentage: number }
 interface Account {
+  id: number
+  name: string
+  ownerId: number | null
+  shares: AccountShare[]
+}
+
+interface Member {
   id: number
   name: string
 }
@@ -66,6 +74,7 @@ interface BillListProps {
   bills: Bill[]
   pots: Pot[]
   accounts: Account[]
+  members?: Member[]
 }
 
 const FREQUENCY_LABELS: Record<string, string> = {
@@ -107,19 +116,47 @@ function getUpcomingBills(bills: Bill[], days = 30) {
   return upcoming.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
 }
 
-export function BillList({ bills, pots, accounts }: BillListProps) {
+export function BillList({ bills, pots, accounts, members = [] }: BillListProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingBill, setEditingBill] = useState<Bill | null>(null)
+  const { activeMemberId } = useMember()
 
-  const potBills = bills.filter((b) => b.potId !== null)
-  const accountBills = bills.filter((b) => b.potId === null)
-  const upcoming = getUpcomingBills(bills)
+  const memberAccountIds = useMemo(() => {
+    if (!activeMemberId) return null
+    return new Set(
+      accounts
+        .filter((a) => a.ownerId === activeMemberId || a.shares.some((s) => s.memberId === activeMemberId))
+        .map((a) => a.id)
+    )
+  }, [accounts, activeMemberId])
 
-  if (bills.length === 0) {
+  const potAccountIdMap = useMemo(
+    () => new Map(pots.map((p) => [p.id, p.accountId])),
+    [pots]
+  )
+
+  const visibleBills = useMemo(() => {
+    if (!memberAccountIds) return bills
+    return bills.filter((bill) => {
+      if (bill.splits.some((s) => s.memberId === activeMemberId)) return true
+      if (bill.splits.length === 0) {
+        const acctId = bill.accountId ?? (bill.potId !== null ? potAccountIdMap.get(bill.potId) ?? null : null)
+        if (acctId === null) return true
+        return memberAccountIds.has(acctId)
+      }
+      return false
+    })
+  }, [bills, memberAccountIds, potAccountIdMap, activeMemberId])
+
+  const potBills = visibleBills.filter((b) => b.potId !== null)
+  const accountBills = visibleBills.filter((b) => b.potId === null)
+  const upcoming = getUpcomingBills(visibleBills)
+
+  if (visibleBills.length === 0) {
     return (
       <div>
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold tracking-tight">Bills</h1>
+          <h1 className="t-h1">Bills</h1>
           <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4" />
             Add bill
@@ -140,7 +177,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
         </div>
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <BillForm pots={pots} accounts={accounts} onClose={() => setCreateDialogOpen(false)} />
+          <BillForm pots={pots} accounts={accounts} members={members} onClose={() => setCreateDialogOpen(false)} />
         </Dialog>
       </div>
     )
@@ -149,7 +186,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Bills</h1>
+        <h1 className="t-h1">Bills</h1>
         <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Add bill
@@ -158,19 +195,19 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
 
       {potBills.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+          <h2 className="t-caption uppercase tracking-widest text-muted-foreground/60 mb-3">
             Pot bills
           </h2>
-          <BillTable bills={potBills} pots={pots} accounts={accounts} onEdit={setEditingBill} />
+          <BillTable bills={potBills} pots={pots} accounts={accounts} activeMemberId={activeMemberId} onEdit={setEditingBill} />
         </div>
       )}
 
       {accountBills.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+          <h2 className="t-caption uppercase tracking-widest text-muted-foreground/60 mb-3">
             Account bills
           </h2>
-          <BillTable bills={accountBills} pots={pots} accounts={accounts} onEdit={setEditingBill} />
+          <BillTable bills={accountBills} pots={pots} accounts={accounts} activeMemberId={activeMemberId} onEdit={setEditingBill} />
         </div>
       )}
 
@@ -180,7 +217,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="size-4 text-muted-foreground" />
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <h2 className="t-caption uppercase tracking-widest text-muted-foreground/60">
                 Upcoming (next 30 days)
               </h2>
             </div>
@@ -188,7 +225,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
               {upcoming.map(({ bill, dueDate }, i) => (
                 <div
                   key={`${bill.id}-${i}`}
-                  className="flex items-center justify-between rounded-lg border border-border px-4 py-2.5"
+                  className="elevation-1 flex items-center justify-between px-4 py-2.5"
                 >
                   <div className="flex items-center gap-3">
                     <BillLogo name={bill.name} size={28} />
@@ -200,7 +237,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold">£{(bill.amountPence / 100).toFixed(2)}</p>
+                    <p className="t-label font-semibold font-money">£{(getMemberAmount(bill, activeMemberId) / 100).toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">{format(dueDate, 'd MMM yyyy')}</p>
                   </div>
                 </div>
@@ -211,7 +248,7 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
       )}
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <BillForm pots={pots} accounts={accounts} onClose={() => setCreateDialogOpen(false)} />
+        <BillForm pots={pots} accounts={accounts} members={members} onClose={() => setCreateDialogOpen(false)} />
       </Dialog>
 
       <Dialog
@@ -219,9 +256,11 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
         onOpenChange={(open) => !open && setEditingBill(null)}
       >
         <BillForm
+          key={editingBill?.id ?? 'new'}
           bill={editingBill}
           pots={pots}
           accounts={accounts}
+          members={members}
           onClose={() => setEditingBill(null)}
         />
       </Dialog>
@@ -229,14 +268,22 @@ export function BillList({ bills, pots, accounts }: BillListProps) {
   )
 }
 
+function getMemberAmount(bill: Bill, activeMemberId: number | null): number {
+  if (activeMemberId === null || bill.splits.length === 0) return bill.amountPence
+  const split = bill.splits.find((s) => s.memberId === activeMemberId)
+  if (!split) return bill.amountPence
+  return Math.round(bill.amountPence * split.percentage / 100)
+}
+
 interface BillTableProps {
   bills: Bill[]
   pots: Pot[]
   accounts: Account[]
+  activeMemberId: number | null
   onEdit: (bill: Bill) => void
 }
 
-function BillTable({ bills, pots, accounts, onEdit }: BillTableProps) {
+function BillTable({ bills, pots, accounts, activeMemberId, onEdit }: BillTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -252,7 +299,7 @@ function BillTable({ bills, pots, accounts, onEdit }: BillTableProps) {
       </TableHeader>
       <TableBody>
         {bills.map((bill) => (
-          <BillRow key={bill.id} bill={bill} pots={pots} accounts={accounts} onEdit={() => onEdit(bill)} />
+          <BillRow key={bill.id} bill={bill} pots={pots} accounts={accounts} activeMemberId={activeMemberId} onEdit={() => onEdit(bill)} />
         ))}
       </TableBody>
     </Table>
@@ -263,25 +310,16 @@ interface BillRowProps {
   bill: Bill
   pots: Pot[]
   accounts: Account[]
+  activeMemberId: number | null
   onEdit: () => void
 }
 
-function BillRow({ bill, pots, accounts, onEdit }: BillRowProps) {
+function BillRow({ bill, pots, accounts, activeMemberId, onEdit }: BillRowProps) {
   const [pending, setPending] = useState(false)
 
   async function handleDelete() {
     setPending(true)
     await deleteBillAction(bill.id)
-    setPending(false)
-  }
-
-  async function handleTogglePaid() {
-    setPending(true)
-    if (bill.isPaid) {
-      await markBillUnpaidAction(bill.id)
-    } else {
-      await markBillPaidAction(bill.id)
-    }
     setPending(false)
   }
 
@@ -291,38 +329,21 @@ function BillRow({ bill, pots, accounts, onEdit }: BillRowProps) {
       : null
 
   return (
-    <TableRow className={bill.isPaid ? 'opacity-60' : ''}>
+    <TableRow>
       <TableCell>
         <div>
-          <p className={bill.isPaid ? 'line-through' : ''}>{bill.name}</p>
+          <p>{bill.name}</p>
           {splitSummary && (
             <p className="text-xs text-muted-foreground">{splitSummary}</p>
           )}
         </div>
       </TableCell>
-      <TableCell>£{(bill.amountPence / 100).toFixed(2)}</TableCell>
+      <TableCell>£{(getMemberAmount(bill, activeMemberId) / 100).toFixed(2)}</TableCell>
       <TableCell>{FREQUENCY_LABELS[bill.frequency]}</TableCell>
       <TableCell>{getSourceLabel(bill, pots, accounts)}</TableCell>
       <TableCell>{format(new Date(bill.nextDueDate), 'd MMM yyyy')}</TableCell>
       <TableCell>
-        {bill.isPaid ? (
-          <Badge variant="success">Paid</Badge>
-        ) : (
-          <Badge variant="outline">Due</Badge>
-        )}
-      </TableCell>
-      <TableCell>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={bill.isPaid ? 'Mark unpaid' : 'Mark paid'}
-            onClick={handleTogglePaid}
-            disabled={pending}
-            className={bill.isPaid ? '' : 'text-green-600'}
-          >
-            {bill.isPaid ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-          </Button>
           <Button
             variant="ghost"
             size="icon"
