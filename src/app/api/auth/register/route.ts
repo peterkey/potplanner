@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
-import { getUserByEmail, createUser } from '@/lib/dal/auth'
+import { getUserByEmail, getAllUsers, createUser } from '@/lib/dal/auth'
 import { signSession } from '@/lib/auth/session'
 
 const registerRateLimiter = new RateLimiterMemory({
@@ -51,8 +51,11 @@ export async function POST(request: Request) {
     )
   }
 
+  const existingUsers = await getAllUsers()
+  const isFirstUser = existingUsers.length === 0
+
   const passwordHash = await bcrypt.hash(password, 12)
-  const user = await createUser(email, passwordHash)
+  const user = await createUser(email, passwordHash, isFirstUser)
 
   await signSession(user.id)
 

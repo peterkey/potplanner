@@ -2,6 +2,7 @@ import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { redis } from '@/lib/redis'
+import { getUserById } from '@/lib/dal/auth'
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!)
 const COOKIE_NAME = 'session'
@@ -53,6 +54,15 @@ export async function verifySession(): Promise<{ userId: number; jti: string }> 
   }
 
   return { userId: Number(payload.sub), jti: payload.jti as string }
+}
+
+export async function verifyAdminSession(): Promise<{ userId: number; jti: string }> {
+  const session = await verifySession()
+  const user = await getUserById(session.userId)
+  if (!user?.isAdmin) {
+    throw new Error('Admin access required')
+  }
+  return session
 }
 
 export async function destroySession(): Promise<void> {
