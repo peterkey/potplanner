@@ -2,56 +2,97 @@
 
 A self-hosted household budgeting app. Income flows into pots, bills are tracked, and the financial engine tells you exactly where you stand each month.
 
-Built with Next.js 16, Drizzle ORM, PostgreSQL, and Redis. Runs entirely in Docker.
-
 ---
 
-## Quick Start (Production)
+## Self-hosting
 
-### Prerequisites
+You only need Docker. No git clone required.
 
-- Docker and Docker Compose v2
+### 1. Create a folder and add two files
 
-### 1. Clone and configure
-
-```bash
-git clone https://github.com/your-username/potplanner.git
-cd potplanner
-cp .env.example .env
+```
+mkdir potplanner && cd potplanner
 ```
 
-Edit `.env` and set a strong `JWT_SECRET` and your preferred database credentials:
+**`docker-compose.yml`**
+
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: ghcr.io/peterkey/potplanner:migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: ghcr.io/peterkey/potplanner:latest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PORT:-80}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+**`.env`**
 
 ```env
 POSTGRES_DB=potplanner
 POSTGRES_USER=potplanner
-POSTGRES_PASSWORD=your-secure-password
-JWT_SECRET=your-secret-key-min-32-chars
+POSTGRES_PASSWORD=change-me
+JWT_SECRET=change-me-use-a-long-random-string
+
+# Optional: change the port the app listens on (default 80)
+# PORT=8080
 ```
 
-### 2. Start the stack
+### 2. Start
 
 ```bash
-docker compose up --build -d
+docker compose up -d
 ```
 
-This builds the app, runs database migrations automatically, then starts everything. The app is available at **http://localhost**.
-
-### 3. Create your household account
-
-On first run, visit http://localhost and register your household email and password. This is the shared login for all household members.
-
----
-
-## Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router) |
-| Database | PostgreSQL 16 |
-| Cache / Sessions | Redis 7 |
-| ORM | Drizzle ORM |
-| Reverse Proxy | Nginx |
+Migrations run automatically before the app starts. Open **http://localhost** and create your account.
 
 ---
 
@@ -60,15 +101,17 @@ On first run, visit http://localhost and register your household email and passw
 ### With Docker (recommended)
 
 ```bash
+git clone https://github.com/peterkey/potplanner.git
+cd potplanner
 cp .env.example .env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-The dev override mounts your local source into the container for hot reload. App is at **http://localhost:3000**.
+App runs at **http://localhost:3000** with hot reload.
 
 ### Without Docker
 
-Requires local PostgreSQL and Redis matching the connection strings in `.env`.
+Requires local PostgreSQL and Redis.
 
 ```bash
 npm install
@@ -81,25 +124,22 @@ npm run dev
 ```bash
 npm run type-check      # TypeScript check
 npm test                # Vitest unit tests
-npm run db:generate     # Generate a new migration after schema changes
+npm run db:generate     # Generate migration after schema changes
 npm run db:migrate      # Apply pending migrations
-npm run db:studio       # Drizzle Studio (DB browser) at localhost:4983
+npm run db:studio       # Drizzle Studio at localhost:4983
 ```
 
 ---
 
 ## Configuration
 
-All configuration is via environment variables. See `.env.example` for the full list.
-
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `JWT_SECRET` | Yes | Secret key for JWT signing — use a random 32+ char string |
-| `DATABASE_URL` | Yes | PostgreSQL connection URL |
-| `POSTGRES_DB` | Yes | Database name (used by Docker Compose) |
-| `POSTGRES_USER` | Yes | Database user (used by Docker Compose) |
-| `POSTGRES_PASSWORD` | Yes | Database password (used by Docker Compose) |
-| `REDIS_URL` | Yes | Redis connection URL |
+| `JWT_SECRET` | Yes | Secret key for signing sessions — use a long random string |
+| `POSTGRES_DB` | Yes | Database name |
+| `POSTGRES_USER` | Yes | Database user |
+| `POSTGRES_PASSWORD` | Yes | Database password |
+| `PORT` | No | Port to expose (default `80`) |
 
 ---
 

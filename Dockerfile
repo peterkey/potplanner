@@ -17,7 +17,15 @@ COPY . .
 ENV NODE_ENV=production
 RUN npm run build
 
-# Stage 3 — runner
+# Stage 3 — migrator (runs DB migrations; published as :migrate tag)
+FROM node:${NODE_VERSION} AS migrator
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/scripts/migrate.ts ./scripts/migrate.ts
+CMD ["node_modules/.bin/tsx", "scripts/migrate.ts"]
+
+# Stage 4 — runner
 FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
 ENV NODE_ENV=production

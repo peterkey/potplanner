@@ -7,6 +7,11 @@ services:
     ports:
       - "6379:6379"
 
+  migrate:
+    build:
+      context: .
+      target: migrator
+
   app:
     build:
       context: .
@@ -21,7 +26,3 @@ services:
       - /app/.next
     environment:
       NODE_ENV: development
-
-  nginx:
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro,z

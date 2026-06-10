@@ -25,10 +25,7 @@ services:
       retries: 5
 
   migrate:
-    build:
-      context: .
-      target: builder
-    command: npx tsx scripts/migrate.ts
+    image: ghcr.io/peterkey/potplanner:migrate
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
@@ -37,12 +34,14 @@ services:
     restart: "no"
 
   app:
-    build: .
+    image: ghcr.io/peterkey/potplanner:latest
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PORT:-80}:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -50,17 +49,6 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    expose:
-      - "3000"
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - app
 
 volumes:
   postgres_data:
