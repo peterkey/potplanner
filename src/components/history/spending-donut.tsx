@@ -57,15 +57,26 @@ export function SpendingDonut({ slices }: SpendingDonutProps) {
   const cy = 60
   const r = 45
   const circumference = 2 * Math.PI * r
-  let offset = 0
 
-  const paths = slices.map((slice) => {
-    const fraction = slice.amountPence / total
-    const dashArray = `${fraction * circumference} ${circumference}`
-    const rotation = (offset / total) * 360 - 90
-    offset += slice.amountPence
-    return { dashArray, rotation, color: slice.color, potName: slice.potName, fraction }
-  })
+  const { paths } = slices.reduce<{
+    paths: Array<{ dashArray: string; rotation: number; color: string; potName: string; fraction: number }>
+    offset: number
+  }>(
+    ({ paths, offset }, slice) => {
+      const fraction = slice.amountPence / total
+      return {
+        paths: [...paths, {
+          dashArray: `${fraction * circumference} ${circumference}`,
+          rotation: (offset / total) * 360 - 90,
+          color: slice.color,
+          potName: slice.potName,
+          fraction,
+        }],
+        offset: offset + slice.amountPence,
+      }
+    },
+    { paths: [], offset: 0 }
+  )
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-6">

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   LayoutDashboard,
   CreditCard,
@@ -31,8 +31,6 @@ export function BottomNav() {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  useEffect(() => { setMoreOpen(false) }, [pathname])
-
   const isMoreActive = MORE_ITEMS.some((item) => pathname.startsWith(item.href))
 
   return (
@@ -59,6 +57,7 @@ export function BottomNav() {
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMoreOpen(false)}
                 className={`flex items-center gap-3 px-5 py-3.5 transition-opacity duration-150 ${
                   isActive ? 'opacity-100' : 'opacity-60'
                 }`}

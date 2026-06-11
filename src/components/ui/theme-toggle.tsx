@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes'
 import { Sun, Monitor, Moon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 const OPTIONS = [
   { value: 'light', icon: Sun, label: 'Light' },
@@ -12,9 +12,7 @@ const OPTIONS = [
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   if (!mounted) return <div className="h-8 w-[120px] rounded-lg bg-muted animate-pulse" />
 
