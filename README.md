@@ -58,7 +58,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-}
+    volumes:
+      - app_data:/data
     ports:
       - "${PORT:-80}:3000"
     depends_on:
@@ -72,6 +74,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  app_data:
 ```
 
 **`.env`**
@@ -80,7 +83,8 @@ volumes:
 POSTGRES_DB=potplanner
 POSTGRES_USER=potplanner
 POSTGRES_PASSWORD=change-me
-JWT_SECRET=change-me-use-a-long-random-string
+# Optional: set a fixed JWT secret (auto-generated and persisted to /data if omitted)
+# JWT_SECRET=change-me-use-a-long-random-string
 
 # Optional: change the port the app listens on (default 80)
 # PORT=8080
@@ -100,7 +104,7 @@ Migrations run automatically before the app starts. Open **http://localhost** an
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `JWT_SECRET` | Yes | Secret key for signing sessions — use a long random string |
+| `JWT_SECRET` | No | Secret key for signing sessions — auto-generated and persisted to `/data` if omitted |
 | `POSTGRES_DB` | Yes | Database name |
 | `POSTGRES_USER` | Yes | Database user |
 | `POSTGRES_PASSWORD` | Yes | Database password |
