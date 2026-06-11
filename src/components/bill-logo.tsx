@@ -27,7 +27,7 @@ export function BillLogo({ name, size = 24 }: BillLogoProps) {
   // referrerPolicy prevents leaking the page URL via Referer header.
   // Trade-off accepted for a self-hosted personal tool; remove if logo fetch is unwanted.
   return (
-    // eslint-disable-next-line @next/next-eslint/no-img-element
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`https://logo.clearbit.com/${domain}`}
       alt={name}
