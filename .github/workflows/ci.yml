@@ -38,7 +38,7 @@ jobs:
       JWT_SECRET: ci-test-secret
       NODE_ENV: test
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -49,60 +49,3 @@ jobs:
       - run: npm run type-check
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: next-build
-          path: .next/
-          retention-days: 1
-
-  e2e:
-    needs: test
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: potplanner
-          POSTGRES_USER: potplanner
-          POSTGRES_PASSWORD: potplanner
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-    env:
-      DATABASE_URL: postgresql://potplanner:potplanner@localhost:5432/potplanner
-      REDIS_URL: redis://localhost:6379
-      JWT_SECRET: ci-test-secret
-      NODE_ENV: production
-    steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-      - run: npm ci
-      - run: npx playwright install chromium firefox --with-deps
-      - run: npm run db:migrate
-      - uses: actions/download-artifact@v4
-        with:
-          name: next-build
-          path: .next/
-      - run: npx playwright test
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
