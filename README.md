@@ -59,6 +59,7 @@ services:
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:-}
+      SECURE_COOKIE: ${SECURE_COOKIE:-true}
     volumes:
       - app_data:/data
     ports:
@@ -86,6 +87,9 @@ POSTGRES_PASSWORD=change-me
 # Optional: set a fixed JWT secret (auto-generated and persisted to /data if omitted)
 # JWT_SECRET=change-me-use-a-long-random-string
 
+# Optional: set to false if serving over plain HTTP (e.g. local network without TLS)
+# SECURE_COOKIE=false
+
 # Optional: change the port the app listens on (default 80)
 # PORT=8080
 ```
@@ -105,6 +109,7 @@ Migrations run automatically before the app starts. Open **http://localhost** an
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `JWT_SECRET` | No | Secret key for signing sessions — auto-generated and persisted to `/data` if omitted |
+| `SECURE_COOKIE` | No | Set to `false` to allow login over plain HTTP (default: `true` in production) |
 | `POSTGRES_DB` | Yes | Database name |
 | `POSTGRES_USER` | Yes | Database user |
 | `POSTGRES_PASSWORD` | Yes | Database password |

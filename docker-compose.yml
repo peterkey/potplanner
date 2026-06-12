@@ -40,6 +40,7 @@ services:
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:-}
+      SECURE_COOKIE: ${SECURE_COOKIE:-true}
     volumes:
       - app_data:/data
     ports:
