@@ -12,6 +12,11 @@ const ibmPlexSans = IBM_Plex_Sans({
 export const metadata: Metadata = {
   title: "PotPlanner",
   description: "Household budgeting app",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'PotPlanner',
+  },
 }
 
 export default function RootLayout({
@@ -21,6 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#f3223f" />
+      </head>
       <body className={`${ibmPlexSans.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}

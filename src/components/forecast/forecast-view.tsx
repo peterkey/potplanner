@@ -243,12 +243,10 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/40">
-                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Period</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Pay</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Pots</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Bills</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Disposable</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Running</th>
+                  <th className="text-left px-2 sm:px-4 py-2.5 font-medium text-muted-foreground">Period</th>
+                  <th className="hidden sm:table-cell text-right px-4 py-2.5 font-medium text-muted-foreground">Pay</th>
+                  <th className="hidden sm:table-cell text-right px-4 py-2.5 font-medium text-muted-foreground">Bills</th>
+                  <th className="text-right px-2 sm:px-4 py-2.5 font-medium text-muted-foreground">Disposable</th>
                   <th className="w-8 px-2" />
                 </tr>
               </thead>
@@ -257,7 +255,6 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
                   const key = `${i}`
                   const isExpanded = expandedKey === key
                   const disposableNeg = p.disposableIncomePence < 0
-                  const runningNeg = p.cumulativeBalancePence < 0
 
                   return (
                     <Fragment key={key}>
@@ -265,29 +262,19 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
                         className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
                         onClick={() => setExpandedKey(isExpanded ? null : key)}
                       >
-                        <td className="px-4 py-2.5 font-medium whitespace-nowrap">
+                        <td className="px-2 sm:px-4 py-2.5 font-medium">
                           {periodLabel(p.periodStart, p.periodEnd)}
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums font-money">{pence(p.incomePence)}</td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground font-money">
-                          {p.potAllocationsPence > 0 ? `-${pence(p.potAllocationsPence)}` : '—'}
-                        </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground font-money">
+                        <td className="hidden sm:table-cell px-4 py-2.5 text-right tabular-nums font-money">{pence(p.incomePence)}</td>
+                        <td className="hidden sm:table-cell px-4 py-2.5 text-right tabular-nums text-muted-foreground font-money">
                           {p.totalBillsPence > 0 ? `-${pence(p.totalBillsPence)}` : '—'}
                         </td>
                         <td
-                          className={`px-4 py-2.5 text-right tabular-nums font-medium font-money ${
+                          className={`px-2 sm:px-4 py-2.5 text-right tabular-nums font-medium font-money ${
                             disposableNeg ? 'text-destructive' : 'text-[var(--color-success)]'
                           }`}
                         >
                           {pence(p.disposableIncomePence)}
-                        </td>
-                        <td
-                          className={`px-4 py-2.5 text-right tabular-nums font-money ${
-                            runningNeg ? 'text-destructive' : ''
-                          }`}
-                        >
-                          {pence(p.cumulativeBalancePence)}
                         </td>
                         <td className="px-2 py-2.5 text-center">
                           <ChevronDown
@@ -299,7 +286,7 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
                       </tr>
                       {isExpanded && (
                         <tr key={`${key}-detail`} className="bg-muted/20">
-                          <td colSpan={7} className="px-6 py-3">
+                          <td colSpan={5} className="px-6 py-3">
                             {p.billsDue.length === 0 ? (
                               <p className="text-sm text-muted-foreground">No bills due this period.</p>
                             ) : (
