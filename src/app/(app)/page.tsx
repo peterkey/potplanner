@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   if (incomes.length === 0) {
     return (
       <PageTransition>
-      <div className="px-8 py-8 max-w-2xl">
+      <div className="px-4 sm:px-8 py-8 max-w-2xl">
         <div className="animate-reveal-up mb-6" style={{ '--delay': '0ms' } as CSSProperties}>
           <h1 className="text-2xl font-bold tracking-tight mb-1">Dashboard</h1>
         </div>

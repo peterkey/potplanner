@@ -236,7 +236,7 @@ export function DashboardView({ billsWithSplits, pots, accounts, debts, incomes,
 
   if (visibleIncomes.length === 0) {
     return (
-      <div className="px-8 py-8 max-w-2xl">
+      <div className="px-4 sm:px-8 py-8 max-w-2xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight mb-1">Dashboard</h1>
         </div>
@@ -251,7 +251,7 @@ export function DashboardView({ billsWithSplits, pots, accounts, debts, incomes,
   }
 
   return (
-    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="px-8 py-8 max-w-2xl">
+    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="px-4 sm:px-8 py-8 max-w-2xl">
 
       {/* KPI cards */}
       <motion.div variants={staggerItem} className="grid grid-cols-2 gap-3 mb-6">
@@ -301,7 +301,7 @@ export function DashboardView({ billsWithSplits, pots, accounts, debts, incomes,
               : `Pay period · ${format(windowStart, 'd MMM')} → ${format(windowEnd, 'd MMM yyyy')}`}
           </p>
 
-          <p className="text-[38px] font-bold tabular-nums leading-none tracking-tight mb-1">
+          <p className="text-[clamp(1.625rem,8vw,2.375rem)] font-bold tabular-nums leading-none tracking-tight mb-1">
             {fmt(allocation.totalNeededPence)}
           </p>
           <p className="text-[13px] mb-5" style={{ color: 'rgba(255,255,255,0.45)' }}>needed in pots this cycle</p>
