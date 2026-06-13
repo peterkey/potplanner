@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,17 +18,21 @@ export function MemberForm({ member, onClose }: MemberFormProps) {
     action,
     {} as MemberActionState
   )
+  const actedState = useRef<typeof state | null>(null)
 
   useEffect(() => {
-    if (state.success) onClose()
-  }, [state.success, onClose])
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
+      onClose()
+    }
+  }, [state, onClose])
 
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>{member ? 'Edit member' : 'Add household member'}</DialogTitle>
       </DialogHeader>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} autoComplete="off" className="space-y-4">
         {member && <input type="hidden" name="id" value={member.id} />}
         <div className="space-y-1">
           <Label htmlFor="member-name">Name</Label>

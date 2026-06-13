@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -44,10 +44,14 @@ export function IncomeForm({ income, members, onClose }: Props) {
     action,
     {} as IncomeFormState,
   )
+  const actedState = useRef<typeof state | null>(null)
 
   useEffect(() => {
-    if (state.success) onClose()
-  }, [state.success, onClose])
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
+      onClose()
+    }
+  }, [state, onClose])
 
   const defaultFrequency = (income?.frequency ?? 'monthly') as PayFrequency
   const defaultDate = income?.nextPayDate
@@ -60,7 +64,7 @@ export function IncomeForm({ income, members, onClose }: Props) {
         <DialogTitle>{income ? 'Edit income' : 'Add income'}</DialogTitle>
       </DialogHeader>
 
-      <form action={formAction} className="space-y-4 mt-2">
+      <form action={formAction} autoComplete="off" className="space-y-4 mt-2">
         {income && <input type="hidden" name="id" value={income.id} />}
 
         <div>

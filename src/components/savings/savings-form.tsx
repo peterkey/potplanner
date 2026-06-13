@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -48,6 +48,7 @@ export function SavingsForm({ goal, pots, members, onClose }: SavingsFormProps) 
     action,
     {} as SavingsGoalActionState
   )
+  const actedState = useRef<typeof state | null>(null)
 
   const [selectedPotId, setSelectedPotId] = useState(goal?.potId?.toString() ?? 'none')
   const [contributors, setContributors] = useState<Contributor[]>(
@@ -61,8 +62,11 @@ export function SavingsForm({ goal, pots, members, onClose }: SavingsFormProps) 
     : ''
 
   useEffect(() => {
-    if (state.success) onClose()
-  }, [state.success, onClose])
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
+      onClose()
+    }
+  }, [state, onClose])
 
   const availableMembers = members.filter(
     (m) => !contributors.some((c) => c.memberId === m.id)
@@ -93,6 +97,7 @@ export function SavingsForm({ goal, pots, members, onClose }: SavingsFormProps) 
         <DialogTitle>{goal ? 'Edit savings goal' : 'Add savings goal'}</DialogTitle>
       </DialogHeader>
       <form
+        autoComplete="off"
         action={(fd) => {
           fd.set('contributors', JSON.stringify(contributors))
           formAction(fd)

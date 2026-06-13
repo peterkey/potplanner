@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { useMember } from '@/lib/context/member-context'
 import {
   LayoutDashboard,
   CreditCard,
@@ -27,11 +28,22 @@ const MORE_ITEMS = [
   { href: '/household', icon: Users, label: 'Household' },
 ]
 
-export function BottomNav() {
+interface Member {
+  id: number
+  name: string
+}
+
+interface BottomNavProps {
+  members: Member[]
+}
+
+export function BottomNav({ members }: BottomNavProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
+  const { activeMemberId, setActiveMemberId } = useMember()
 
   const isMoreActive = MORE_ITEMS.some((item) => pathname.startsWith(item.href))
+  const hasFilter = activeMemberId !== null
 
   return (
     <>
@@ -50,6 +62,40 @@ export function BottomNav() {
           transform: moreOpen ? 'translateY(0)' : 'translateY(100%)',
         }}
       >
+        {/* Member filter */}
+        {members.length > 0 && (
+          <div className="px-5 pt-4 pb-3 border-b border-border/50">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-2.5">
+              Viewing
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveMemberId(null)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  activeMemberId === null
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                All members
+              </button>
+              {members.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setActiveMemberId(m.id)}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    activeMemberId === m.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col py-2">
           {MORE_ITEMS.map(({ href, icon: Icon, label }) => {
             const isActive = pathname.startsWith(href)
@@ -98,7 +144,7 @@ export function BottomNav() {
 
           <button
             onClick={() => setMoreOpen((o) => !o)}
-            className={`flex flex-col items-center justify-center flex-1 gap-0.5 px-1 transition-opacity duration-150 ${
+            className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 px-1 transition-opacity duration-150 ${
               moreOpen || isMoreActive ? 'opacity-100' : 'opacity-40'
             }`}
           >
@@ -106,6 +152,9 @@ export function BottomNav() {
             <span className={`text-[10.5px] font-semibold tracking-wide ${moreOpen || isMoreActive ? 'text-primary' : 'text-foreground'}`}>
               More
             </span>
+            {hasFilter && (
+              <span className="absolute top-2.5 right-[calc(50%-14px)] h-2 w-2 rounded-full bg-primary" />
+            )}
           </button>
         </div>
       </nav>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,6 +36,7 @@ export function DebtForm({ debt, accounts, pots, members, onClose }: DebtFormPro
     action,
     {} as DebtActionState
   )
+  const actedState = useRef<typeof state | null>(null)
 
   const initialAccountId = debt?.accountId?.toString() ?? (debt?.potId
     ? (pots.find((p) => p.id === debt.potId)?.accountId?.toString() ?? 'none')
@@ -51,8 +52,11 @@ export function DebtForm({ debt, accounts, pots, members, onClose }: DebtFormPro
   )
 
   useEffect(() => {
-    if (state.success) onClose()
-  }, [state.success, onClose])
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
+      onClose()
+    }
+  }, [state, onClose])
 
   function handleAccountChange(value: string) {
     setSelectedAccountId(value)
@@ -64,7 +68,7 @@ export function DebtForm({ debt, accounts, pots, members, onClose }: DebtFormPro
       <DialogHeader>
         <DialogTitle>{debt ? 'Edit debt' : 'Add debt'}</DialogTitle>
       </DialogHeader>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} autoComplete="off" className="space-y-4">
         {debt && <input type="hidden" name="id" value={debt.id} />}
         <input type="hidden" name="accountId" value={selectedPotId !== 'none' ? 'none' : selectedAccountId} />
         <input type="hidden" name="potId" value={selectedPotId} />

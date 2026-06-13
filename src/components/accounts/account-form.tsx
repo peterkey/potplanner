@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import {
   createAccountAction,
@@ -47,6 +47,7 @@ export function AccountForm({ account, members, onClose }: AccountFormProps) {
     action,
     {} as AccountActionState
   )
+  const actedState = useRef<typeof state | null>(null)
 
   const [ownerId, setOwnerId] = useState<string>(account?.ownerId?.toString() ?? 'none')
   const [shared, setShared] = useState(account ? account.shares.length > 0 : false)
@@ -55,8 +56,11 @@ export function AccountForm({ account, members, onClose }: AccountFormProps) {
   )
 
   useEffect(() => {
-    if (state.success) onClose()
-  }, [state.success, onClose])
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
+      onClose()
+    }
+  }, [state, onClose])
 
   function handleOwnerChange(value: string) {
     setOwnerId(value)
@@ -95,7 +99,7 @@ export function AccountForm({ account, members, onClose }: AccountFormProps) {
       <DialogHeader>
         <DialogTitle>{account ? 'Edit account' : 'Add account'}</DialogTitle>
       </DialogHeader>
-      <form action={formAction} className="flex flex-col gap-4">
+      <form action={formAction} autoComplete="off" className="flex flex-col gap-4">
         {account && <input type="hidden" name="id" value={account.id} />}
         <input type="hidden" name="ownerId" value={ownerId} />
         <input type="hidden" name="shares" value={shared ? JSON.stringify(shares) : '[]'} />

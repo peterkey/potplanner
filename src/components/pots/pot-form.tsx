@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,23 +24,25 @@ interface PotFormProps {
 export function PotForm({ pot, accounts, defaultAccountId, onClose }: PotFormProps) {
   const action = pot ? updatePotAction : createPotAction
   const [state, formAction, pending] = useActionState(action, {} as PotActionState)
+  const actedState = useRef<typeof state | null>(null)
 
   const [selectedAccountId, setSelectedAccountId] = useState(
     pot?.accountId?.toString() ?? defaultAccountId?.toString() ?? 'none'
   )
 
   useEffect(() => {
-    if (state.success) {
+    if (state.success && state !== actedState.current) {
+      actedState.current = state
       onClose()
     }
-  }, [state.success, onClose])
+  }, [state, onClose])
 
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>{pot ? 'Edit pot' : 'Add pot'}</DialogTitle>
       </DialogHeader>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} autoComplete="off" className="space-y-4">
         {pot && <input type="hidden" name="id" value={pot.id} />}
 
         <div className="space-y-1">
