@@ -40,7 +40,15 @@ export function getBillOccurrences(bill: Bill, startDate: Date, endDate: Date): 
   if (bill.frequency === 'monthly' || bill.frequency === 'annual') {
     // Period-count approach: avoids drift from repeated addMonths on clamped dates.
     // Compute candidate as addMonths/addYears from the ORIGINAL base date.
+    // Walk backward first so occurrences before nextDueDate (e.g. after a user
+    // advances the date post-payment) are still found within the window.
     let i = 0
+    if (bill.frequency === 'monthly') {
+      while (addMonths(base, i - 1) >= startDate) i--
+    } else {
+      while (addYears(base, i - 1) >= startDate) i--
+    }
+
     while (true) {
       const candidate =
         bill.frequency === 'monthly' ? addMonths(base, i) : addYears(base, i)
@@ -56,6 +64,15 @@ export function getBillOccurrences(bill: Bill, startDate: Date, endDate: Date): 
   } else {
     // Day-based frequencies: advance until reaching startDate, then collect.
     let current = new Date(base)
+    const stepDays = bill.frequency === 'weekly' ? 7 : bill.frequency === 'biweekly' ? 14 : 28
+
+    // If nextDueDate is past the window, walk backward so occurrences within
+    // the window (before nextDueDate) are still found.
+    if (current > endDate) {
+      while (current > startDate) {
+        current = addDays(current, -stepDays)
+      }
+    }
 
     // Skip occurrences before startDate
     while (current < startDate) {

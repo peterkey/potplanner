@@ -72,11 +72,22 @@ interface AccountRow {
   shares: { memberId: number }[]
 }
 
+interface DebtRow {
+  id: number
+  name: string
+  minimumPaymentPence: number
+  paymentDueDate: string | null
+  accountId: number | null
+  potId: number | null
+  memberId: number | null
+}
+
 interface Props {
   incomes: IncomeRow[]
   billsWithSplits: BillWithSplits[]
   pots: PotRow[]
   accounts: AccountRow[]
+  debts: DebtRow[]
 }
 
 function pence(n: number) {
@@ -98,7 +109,7 @@ function periodLabel(startIso: string, endIso: string): string {
   return `${format(start, 'd MMM yyyy')} – ${format(end, 'd MMM yyyy')}`
 }
 
-export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props) {
+export function ForecastView({ incomes, billsWithSplits, pots, accounts, debts }: Props) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
   const { activeMemberId } = useMember()
 
@@ -124,7 +135,7 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
   }, [incomes, activeMemberId])
 
   const engineBills = useMemo((): Bill[] => {
-    return billsWithSplits.flatMap((bill) => {
+    const regularBills = billsWithSplits.flatMap((bill) => {
       const nextDueDate = new Date(bill.nextDueDate)
       const frequency = bill.frequency as BillFrequency
 
@@ -142,7 +153,24 @@ export function ForecastView({ incomes, billsWithSplits, pots, accounts }: Props
       if (billAcctId !== null && !memberAccountIds!.has(billAcctId)) return []
       return [{ id: bill.id, name: bill.name, amountPence: bill.amountPence, frequency, potId: bill.potId, accountId: bill.accountId, nextDueDate }]
     })
-  }, [billsWithSplits, activeMemberId, memberAccountIds, potAccountIdMap])
+
+    const today = new Date()
+    const debtBills = debts.flatMap((debt) => {
+      if (activeMemberId !== null && debt.memberId !== activeMemberId) return []
+      const nextDueDate = debt.paymentDueDate ? new Date(debt.paymentDueDate) : today
+      return [{
+        id: -(debt.id),
+        name: `${debt.name} (min. payment)`,
+        amountPence: debt.minimumPaymentPence,
+        frequency: 'monthly' as BillFrequency,
+        potId: debt.potId,
+        accountId: debt.accountId,
+        nextDueDate,
+      }]
+    })
+
+    return [...regularBills, ...debtBills]
+  }, [billsWithSplits, debts, activeMemberId, memberAccountIds, potAccountIdMap])
 
   const enginePots = useMemo((): Pot[] => {
     const filtered =

@@ -218,12 +218,38 @@ describe('getBillOccurrences - annual', () => {
 })
 
 describe('getBillOccurrences - edge cases', () => {
-  it('bill with nextDueDate after endDate: returns empty array', () => {
+  it('bill with nextDueDate advanced past window: returns occurrences within window', () => {
+    // User paid the bill each month and advanced nextDueDate to Jan 2027
     const bill = makeBill({ frequency: 'monthly', nextDueDate: new Date(2027, 0, 1) })
     const start = new Date(2026, 0, 1)
     const end = new Date(2026, 11, 31)
     const result = getBillOccurrences(bill, start, end)
-    expect(result).toHaveLength(0)
+    // Monthly bill anchored to 1st: Jan 1, Feb 1, ..., Dec 1, 2026
+    expect(result).toHaveLength(12)
+    expect(result[0]).toEqual(new Date(2026, 0, 1))
+    expect(result[11]).toEqual(new Date(2026, 11, 1))
+  })
+
+  it('bill with nextDueDate advanced to next month: still visible in current month', () => {
+    // User paid June 5 and advanced nextDueDate to July 5
+    const bill = makeBill({ frequency: 'monthly', nextDueDate: new Date(2026, 6, 5) })
+    const start = new Date(2026, 5, 1) // June 1
+    const end = new Date(2026, 5, 30) // June 30
+    const result = getBillOccurrences(bill, start, end)
+    expect(result).toHaveLength(1)
+    expect(result[0]).toEqual(new Date(2026, 5, 5)) // June 5
+  })
+
+  it('weekly bill with nextDueDate past window end: returns all occurrences in window', () => {
+    // User advanced nextDueDate to July 6 after paying June 29
+    const bill = makeBill({ frequency: 'weekly', nextDueDate: new Date(2026, 6, 6) })
+    const start = new Date(2026, 5, 1) // June 1
+    const end = new Date(2026, 5, 30) // June 30
+    const result = getBillOccurrences(bill, start, end)
+    // June 1, 8, 15, 22, 29 (5 Mondays in June)
+    expect(result).toHaveLength(5)
+    expect(result[0]).toEqual(new Date(2026, 5, 1))
+    expect(result[4]).toEqual(new Date(2026, 5, 29))
   })
 
   it('bill with nextDueDate exactly on startDate: includes it', () => {
